@@ -1,0 +1,14 @@
+#pragma once
+
+#include <exception>
+#include <string>
+
+namespace std {
+
+class runtime_error : public exception {
+public:
+    constexpr explicit runtime_error(const string& what_arg) {}
+    constexpr explicit runtime_error(const char* what_arg) {}
+};
+
+}

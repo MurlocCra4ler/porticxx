@@ -1,0 +1,10 @@
+#pragma once
+
+#include <bits/memory/allocators.hpp>
+
+namespace std {
+
+template<class T, class Allocator = allocator<T>>
+class list {};
+
+}

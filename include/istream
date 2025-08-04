@@ -1,0 +1,14 @@
+#pragma once
+
+#include <bits/istream/basic_istream.hpp>
+
+namespace std {
+
+/***********/
+/* Classes */
+/***********/
+
+using istream  = basic_istream<char>;
+using wistream = basic_istream<wchar_t>;
+
+}

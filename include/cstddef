@@ -1,0 +1,24 @@
+#pragma once
+
+namespace std {
+
+/**********/
+/* Macros */
+/**********/
+
+#define NULL nullptr
+#define offsetof(type, member) __builtin_offsetof(type, member)
+
+/*********/
+/* Types */
+/*********/
+
+using size_t = decltype(sizeof 0); 
+using nullptr_t = decltype(nullptr);
+using ptrdiff_t = decltype(static_cast<int*>(nullptr) - static_cast<int*>(nullptr));
+
+}
+
+using std::size_t;
+using std::nullptr_t;
+using std::ptrdiff_t;

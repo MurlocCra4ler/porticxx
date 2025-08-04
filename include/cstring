@@ -1,0 +1,9 @@
+#pragma once
+
+#include <cstddef>
+
+namespace std {
+
+size_t strlen(const char* start);
+
+}

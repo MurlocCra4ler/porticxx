@@ -1,0 +1,22 @@
+#pragma once
+
+#include <bits/memory_allocator.hpp>
+
+namespace std {
+
+template<class Key>
+struct hash;
+
+template<class T = void>
+struct equal_to;
+
+template<
+    class Key,
+    class Hash = std::hash<Key>,
+    class KeyEqual = std::equal_to<Key>,
+    class Allocator = std::allocator<Key>
+> class unordered_set {
+
+};
+
+}

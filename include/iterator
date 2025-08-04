@@ -1,0 +1,9 @@
+#pragma once
+
+#include <bits/iterator/primitives.hpp>
+#include <bits/iterator/adaptor_functions.hpp>
+
+namespace std {
+
+
+}

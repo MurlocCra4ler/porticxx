@@ -1,0 +1,61 @@
+#pragma once
+
+#include <cuchar>
+
+namespace std {
+
+/************/
+/* Synopsis */
+/************/
+
+enum float_round_style {
+    round_indeterminate       = -1,
+    round_toward_zero         = 0,
+    round_to_nearest          = 1,
+    round_toward_infinity     = 2,
+    round_toward_neg_infinity = 3
+};
+
+template<class T> class numeric_limits {
+public:
+    static constexpr bool is_specialized = false;
+
+    static constexpr T min() noexcept { return T(); }
+    static constexpr T max() noexcept { return T(); }
+    static constexpr T lowest() noexcept { return T(); }
+};
+
+template<> class numeric_limits<bool>;
+ 
+template<> class numeric_limits<char>;
+template<> class numeric_limits<signed char>;
+template<> class numeric_limits<unsigned char>;
+template<> class numeric_limits<char8_t>;
+template<> class numeric_limits<char16_t>;
+template<> class numeric_limits<char32_t>;
+template<> class numeric_limits<wchar_t>;
+
+template<> class numeric_limits<short>;
+template<> class numeric_limits<int>;
+template<> class numeric_limits<long>;
+template<> class numeric_limits<long long>;
+template<> class numeric_limits<unsigned short>;
+template<> class numeric_limits<unsigned int>;
+
+
+template<> class numeric_limits<unsigned long> {
+public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr unsigned long min() noexcept { return 0UL; }
+    static constexpr unsigned long max() noexcept { return ~0UL; }
+    static constexpr unsigned long lowest() noexcept { return 0UL; }
+};
+
+template<> class numeric_limits<unsigned long long>;
+
+template<> class numeric_limits<float>;
+template<> class numeric_limits<double>;
+template<> class numeric_limits<long double>;
+
+}

@@ -1,0 +1,10 @@
+#pragma once
+
+#include <bits/streambuf/basic_streambuf.hpp>
+
+namespace std {
+
+using streambuf  = basic_streambuf<char>;
+using wstreambuf = basic_streambuf<wchar_t>;
+
+}

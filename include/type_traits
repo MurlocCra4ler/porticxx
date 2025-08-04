@@ -1,0 +1,8 @@
+#pragma once
+
+#include <cstddef>
+
+#include <bits/type_traits/type_properties.hpp>
+#include <bits/type_traits/supported_ops.hpp>
+#include <bits/type_traits/misc_transformations.hpp>
+#include <bits/type_traits/type_relations.hpp>

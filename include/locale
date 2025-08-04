@@ -1,0 +1,93 @@
+#pragma once
+
+#include <cstdint>
+#include <string>
+
+namespace std {
+
+class locale {
+public:
+    // types:
+    class facet {};
+    class id;
+    typedef int category;
+    static const category // values assigned here are for exposition only
+        none     = 0,
+        collate  = 0x010,
+        ctype    = 0x020,
+        monetary = 0x040,
+        numeric  = 0x080,
+        time     = 0x100,
+        messages = 0x200,
+        all = collate | ctype | monetary | numeric | time | messages;
+ 
+    // construct/copy/destroy:
+    locale() noexcept;
+    locale(const locale& other) noexcept;
+    explicit locale(const char* std_name);
+    explicit locale(const string& std_name);
+    locale(const locale& other, const char* std_name, category);
+    locale(const locale& other, const string& std_name, category);
+    template <class Facet> locale(const locale& other, Facet* f);
+    locale(const locale& other, const locale& one, category);
+    ~locale();
+ 
+    // not virtual
+    const locale& operator=(const locale& other) noexcept;
+    template <class Facet> locale combine(const locale& other) const;
+ 
+    // locale operations:
+    basic_string<char>
+    name() const;
+    bool operator==(const locale& other) const;
+    bool operator!=(const locale& other) const;
+    template <class CharT, class Traits, class Allocator>
+    bool operator()(const basic_string<CharT,Traits,Allocator>& s1,
+                    const basic_string<CharT,Traits,Allocator>& s2) const;
+ 
+    // global locale objects:
+    static
+    locale global(const locale&);
+    static const locale& classic();
+};
+
+class ctype_base {
+public:
+    typedef uint16_t mask;
+ 
+    // numeric values are for exposition only.
+    static const mask space = 1 << 0;
+    static const mask print = 1 << 1;
+    static const mask cntrl = 1 << 2;
+    static const mask upper = 1 << 3;
+    static const mask lower = 1 << 4;
+    static const mask alpha = 1 << 5;
+    static const mask digit = 1 << 6;
+    static const mask punct = 1 << 7;
+    static const mask xdigit= 1 << 8;
+    static const mask blank = 1 << 9;
+    static const mask alnum = alpha | digit;
+    static const mask graph = alnum | punct;
+};
+
+template <class CharT>
+class ctype : public locale::facet, public ctype_base {
+public:
+    bool is(mask m, CharT c) const;
+
+};
+
+template< class Facet >
+const Facet& use_facet(const std::locale& loc);
+
+template<class CharT>
+CharT toupper(CharT ch, const std::locale& loc) {
+    return std::use_facet<std::ctype<CharT>>(loc).toupper(ch);
+}
+
+template<class CharT>
+CharT tolower(CharT ch, const std::locale& loc) {
+    return std::use_facet<std::ctype<CharT>>(loc).tolower(ch);
+}
+
+}

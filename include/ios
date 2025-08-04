@@ -1,0 +1,12 @@
+#pragma once
+
+#include <bits/ios/ios_base.hpp>
+
+namespace std {
+
+// basefield
+ios_base& dec        (ios_base& str);
+ios_base& hex        (ios_base& str);
+ios_base& oct        (ios_base& str);
+
+}

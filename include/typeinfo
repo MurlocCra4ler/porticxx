@@ -1,0 +1,54 @@
+#pragma once
+
+#include <cstddef>
+#include <exception>
+
+namespace std {
+
+/************/
+/* Synopsis */
+/************/
+
+class type_info;
+class bad_cast;
+class bad_typeid;
+
+/************************/
+/* Class std::type_info */
+/************************/
+
+class type_info {
+    type_info(const type_info&) = delete;
+    type_info& operator=(const type_info&) = delete;
+
+public:
+    virtual ~type_info();
+    
+    constexpr bool operator==(const type_info& rhs) const noexcept;
+    
+    bool before(const type_info& rhs) const noexcept;
+    
+    size_t hash_code() const noexcept;
+    
+    const char* name() const noexcept;
+};
+
+/***********************/
+/* Class std::bad_cast */
+/***********************/
+
+class bad_cast : public std::exception {
+public:
+    constexpr const char* what() const noexcept override;
+};
+
+/*************************/
+/* Class std::bad_typeid */
+/*************************/
+
+class bad_typeid : public exception {
+public:
+    constexpr const char* what() const noexcept override;
+};
+
+}

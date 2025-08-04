@@ -1,0 +1,10 @@
+#pragma once
+
+namespace std {
+
+template<typename K, typename V>
+class unordered_map {
+
+};
+
+}

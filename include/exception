@@ -1,0 +1,14 @@
+#pragma once
+
+#define NOEXCEPT noexcept
+
+namespace std {
+
+class exception {
+public:
+    virtual const char* what() const noexcept;
+};
+
+class exception_ptr {};
+
+}

@@ -1,0 +1,41 @@
+#pragma once
+
+#include <bits/iterator/primitives.hpp>
+
+namespace std {
+
+// find
+template<class InputIt, class T = typename std::iterator_traits<InputIt>::value_type>
+constexpr InputIt find(InputIt first, InputIt last, const T& value) {
+    for (; first != last; ++first) {
+        if (*first == value) {
+            return first;
+        }   
+    }
+
+    return last;
+}
+
+template<class InputIt, class UnaryPred>
+constexpr InputIt find_if(InputIt first, InputIt last, UnaryPred p) {
+    for (; first != last; ++first) {
+        if (p(*first)) {
+            return first;
+        }
+    }
+
+    return last;
+}
+
+// merge
+template<class InputIter1, class InputIter2, class OutputIter>
+constexpr OutputIter merge(InputIter1 first1, InputIter1 last1,
+                            InputIter2 first2, InputIter2 last2, OutputIter result);
+
+// set_interscect
+template< class InputIt1, class InputIt2, class OutputIt >
+OutputIt set_intersection( InputIt1 first1, InputIt1 last1,
+                           InputIt2 first2, InputIt2 last2,
+                           OutputIt d_first );
+
+}

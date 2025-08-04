@@ -1,0 +1,17 @@
+#pragma once
+
+#include <bits/deque/classes.hpp>
+#include <bits/iterator/primitives.hpp>
+
+namespace std {
+
+/***********/
+/* Classes */
+/***********/
+
+template<class T, class Container = deque<T>>
+class stack {
+
+};
+
+}

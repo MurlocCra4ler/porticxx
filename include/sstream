@@ -1,0 +1,11 @@
+#pragma once
+
+#include <bits/sstream/basic_stringstream.hpp>
+#include <bits/sstream/basic_ostringstream.hpp>
+
+namespace std {
+
+using ostringstream = basic_ostringstream<char>;
+using stringstream = basic_stringstream<char>;
+
+}

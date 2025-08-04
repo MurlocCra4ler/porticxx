@@ -1,0 +1,21 @@
+#pragma once
+
+#include <bits/ostream/basic_ostream.hpp>
+
+namespace std {
+
+/***********/
+/* Classes */
+/***********/
+
+using ostream  = basic_ostream<char>;
+using wostream = basic_ostream<wchar_t>;
+
+template<class CharT, class Traits>
+basic_ostream<CharT, Traits>& endl(basic_ostream<CharT, Traits>& os) {
+    os.put(os.widen('\n'));
+    os.flush();
+    return os;
+}
+
+}

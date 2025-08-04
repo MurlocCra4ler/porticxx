@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+import sys
+import subprocess
+import shlex
+
+# Liste von Flags, die ignoriert werden sollen
+IGNORED_FLAGS = {
+    '--start-group',
+    '--end-group',
+    '--as-needed',
+    '--no-as-needed',
+    '-Wl,--gc-sections',
+    # weitere problematische Flags hier ergänzen
+}
+
+# Argumente bereinigen
+filtered_args = []
+for arg in sys.argv[1:]:
+    if arg.startswith('-Wl,'):
+        linker_flags = arg[4:].split(',')
+        linker_flags = [f for f in linker_flags if f not in IGNORED_FLAGS]
+        if linker_flags:
+            filtered_args.append('-Wl,' + ','.join(linker_flags))
+    elif arg not in IGNORED_FLAGS:
+        filtered_args.append(arg)
+
+# Befehl zusammensetzen
+command = ['/usr/bin/wasm-ld'] + filtered_args
+
+# Debug-Ausgabe
+print('Running:', ' '.join(shlex.quote(arg) for arg in command), file=sys.stderr)
+
+# Ausführen
+exit_code = subprocess.call(command)
+sys.exit(exit_code)

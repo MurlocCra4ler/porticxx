@@ -1,0 +1,30 @@
+#pragma once
+
+#include <bits/swap.hpp>
+#include <bits/type_traits/refs.hpp>
+
+namespace std {
+
+/*************/
+/* Functions */
+/*************/
+
+template<class T>
+constexpr T&& forward(remove_reference_t<T>& t) noexcept;
+
+template<class T>
+constexpr std::remove_reference_t<T>&& move(T&& t) noexcept;
+
+template<class T1, class T2>
+struct pair {
+using first_type  = T1;
+using second_type = T2;
+
+T1 first;
+T2 second;
+
+pair(const pair&) = default;
+pair(pair&&) = default;
+};
+
+}
