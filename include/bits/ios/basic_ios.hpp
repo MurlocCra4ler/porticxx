@@ -20,7 +20,7 @@ public:
     using traits_type = Traits;
 
     // flags functions
-    void setstate(iostate state);
+    result<void> setstate(iostate state);
 
     // constructor/destructor
     explicit basic_ios(basic_streambuf<CharT, Traits>* sb);
@@ -40,12 +40,14 @@ private:
 
 // flags functions
 template <class CharT, class Traits>
-void basic_ios<CharT, Traits>::setstate(iostate state) {
+result<void> basic_ios<CharT, Traits>::setstate(iostate state) {
     m_state |= state;
 
     if ((m_state & m_exceptions) != 0) {
-        throw ios_base::failure("basic_ios::setstate: exception mask matched");
+        return std::make_exception_ptr(ios_base::failure("basic_ios::setstate: exception mask matched"));
     }
+
+    return {};
 }
 
 // constructor/destructor

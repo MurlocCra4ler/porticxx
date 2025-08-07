@@ -1,3 +1,21 @@
 #pragma once
 
 #include <bits/memory/smart_pointers.hpp>
+#include <bits/memory/pointer_traits.hpp>
+#include <type_traits>
+
+namespace std {
+
+template<class T>
+typename std::enable_if<std::is_object<T>::value, T*>::type addressof(T& arg) noexcept {
+    return reinterpret_cast<T*>(
+               &const_cast<char&>(
+                   reinterpret_cast<const volatile char&>(arg)));
+}
+ 
+template<class T>
+typename std::enable_if<!std::is_object<T>::value, T*>::type addressof(T& arg) noexcept {
+    return &arg;
+}
+
+}

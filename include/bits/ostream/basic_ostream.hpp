@@ -40,25 +40,25 @@ public:
     basic_ostream& operator<<(nullptr_t);
  
     // unformatted output
-    basic_ostream& put(char_type c);
-    basic_ostream& write(const char_type* s, streamsize n);
+    result_ref<basic_ostream> put(char_type c);
+    result_ref<basic_ostream> write(const char_type* s, streamsize n);
  
-    basic_ostream& flush();
+    result_ref<basic_ostream> flush();
 };
 
 // unformatted output
 template<class CharT, class Traits>
-std::basic_ostream<CharT, Traits>& basic_ostream<CharT, Traits>::put(char_type c) {
+result_ref<std::basic_ostream<CharT, Traits>> basic_ostream<CharT, Traits>::put(char_type c) {
     if (this->rdbuf()->sputc(c) == Traits::eof()) {
-        this->setstate(std::ios_base::badbit);
+        return this->setstate(std::ios_base::badbit).map_to_ref(*this);
     }
     return *this;
 }
 
 template<class CharT, class Traits>
-std::basic_ostream<CharT, Traits>& basic_ostream<CharT, Traits>::flush() {
+result_ref<std::basic_ostream<CharT, Traits>> basic_ostream<CharT, Traits>::flush() {
     if (this->rdbuf()->pubsync() == -1) {
-        this->setstate(ios_base::badbit);
+        return this->setstate(ios_base::badbit).map_to_ref(*this);
     }
     return *this;
 }

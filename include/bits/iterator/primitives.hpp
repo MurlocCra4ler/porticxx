@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstddef>
-#include <bits/type_traits/type_categories.hpp>
-#include <bits/type_traits/cv_specifiers.hpp>
+#include <bits/type_traits/unary_type_traits.hpp>
+#include <bits/type_traits/type_transformations.hpp>
 
 namespace std {
 

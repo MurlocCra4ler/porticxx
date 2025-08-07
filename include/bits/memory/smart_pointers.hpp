@@ -9,7 +9,12 @@ namespace std {
 /******************/
 
 template<class T>
-class shared_ptr {};
+class shared_ptr {
+public:
+
+    // observers
+    explicit operator bool() const noexcept;
+};
 
 template<class T>
 class unique_ptr {};

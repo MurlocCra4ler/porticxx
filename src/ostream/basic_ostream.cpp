@@ -14,9 +14,9 @@ basic_ostream<char>& basic_ostream<char>::operator<<(basic_ostream& (*pf)(basic_
 }
 
 template<>
-basic_ostream<char>& basic_ostream<char>::write(const char_type* s, streamsize n) {
+result_ref<basic_ostream<char>> basic_ostream<char>::write(const char_type* s, streamsize n) {
     if (!this->rdbuf() || this->rdbuf()->sputn(s, n) != n) {
-        this->setstate(std::ios_base::badbit);
+        return this->setstate(std::ios_base::badbit).map_to_ref(*this);
     }
 
     return *this;

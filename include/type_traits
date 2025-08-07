@@ -2,7 +2,6 @@
 
 #include <cstddef>
 
-#include <bits/type_traits/type_properties.hpp>
-#include <bits/type_traits/supported_ops.hpp>
-#include <bits/type_traits/misc_transformations.hpp>
-#include <bits/type_traits/type_relations.hpp>
+#include <bits/type_traits/unary_type_traits.hpp>
+#include <bits/type_traits/type_relationships.hpp>
+#include <bits/type_traits/type_transformations.hpp>
