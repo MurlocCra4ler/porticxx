@@ -42,6 +42,8 @@ struct is_base_of :
         std::is_class<Derived>::value &&
         decltype(impl::test_is_base_of<Base, Derived>(0))::value
     > {};
+
+template< class Base, class Derived >
+constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
+
 }
-
-

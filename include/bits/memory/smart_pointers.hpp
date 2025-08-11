@@ -25,4 +25,7 @@ constexpr unique_ptr<T> make_unique(Args&&... args);
 template<class T>
 constexpr unique_ptr<T> make_unique(size_t size);
 
+template<class T, class... Args>
+shared_ptr<T> make_shared(Args&&... args);
+
 }

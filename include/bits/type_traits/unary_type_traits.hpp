@@ -65,6 +65,26 @@ using is_enum = bool_constant<__is_enum(T)>;
 template<class T>
 constexpr bool is_enum_v = is_enum<T>::value;
 
+template<class T>
+using is_union = bool_constant<__is_union(T)>;
+
+template<class T>
+constexpr bool is_union_v = is_union<T>::value;
+ 
+namespace impl_unary_type_traits {
+    template<class T>
+    integral_constant<bool, !is_union_v<T>> test(int T::*);
+ 
+    template<class>
+    false_type test(...);
+}
+ 
+template<class T>
+struct is_class : decltype(impl_unary_type_traits::test<T>(nullptr)) {};
+
+template<class T>
+constexpr bool is_class_v = is_class<T>::value;
+
 /*****************************/
 /* Composite type categories */
 /*****************************/
@@ -108,14 +128,20 @@ constexpr bool is_unsigned_v = is_unsigned<T>::value;
 /* Supported operations */
 /************************/
 
-template< class T, class... Args >
+template<class T, class... Args>
 using is_constructible = bool_constant<__is_constructible(T, Args...)>;
+
+template<class T, class... Args>
+inline constexpr bool is_constructible_v = is_constructible<T, Args...>::value;
 
 template< class T, class... Args >
 using is_trivially_constructible = bool_constant<__is_trivially_constructible(T, Args...)>;
 
 template< class T, class... Args >
 using is_nothrow_constructible = bool_constant<__is_nothrow_constructible(T, Args...)>;
+
+template<class T, class... Args>
+inline constexpr bool is_nothrow_constructible_v = is_nothrow_constructible<T, Args...>::value;
 
 // default constructible
 template<class T>

@@ -1,22 +1,30 @@
 #pragma once
 
 #include <cstddef>
+#include <exception>
+#include <type_traits>
+#include <utility>
+#include <concepts>
+#include <algorithm>
+#include <new>
+
+//#include <bits/variant/bad_variant_access.hpp>
 
 namespace std {
 
 template<class... Types>
-class my_variant;
+class variant;
 
 namespace impl_variant {
 
-template<typename T> struct is_in_place_type_t : std::false_type {};
-template<typename T> struct is_in_place_index_t : std::false_type {};
+template<typename T> struct is_in_place_type_t : false_type {};
+template<typename T> struct is_in_place_index_t : false_type {};
 
 template<typename U>
-struct is_in_place_type_t<std::in_place_type_t<U>> : std::true_type {};
+struct is_in_place_type_t<in_place_type_t<U>> : true_type {};
 
 template<size_t I>
-struct is_in_place_index_t<std::in_place_index_t<I>> : std::true_type {};
+struct is_in_place_index_t<in_place_index_t<I>> : true_type {};
 
 template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
 template<class... Ts> overload(Ts...) -> overload<Ts...>;
@@ -27,19 +35,19 @@ struct indexed_callable {
 };
 
 template<typename... Ts, size_t... Is>
-constexpr auto make_overload_impl(std::index_sequence<Is...>) {
+constexpr auto make_overload_impl(index_sequence<Is...>) {
     return overload{ indexed_callable<Is, Ts>{}... };
 }
 
 template<typename... Ts>
 constexpr auto make_overload() {
-    return make_overload_impl<Ts...>(std::index_sequence_for<Ts...>{});
+    return make_overload_impl<Ts...>(index_sequence_for<Ts...>{});
 }
 
 template<typename T, typename... Types>
 struct best_match {
     using overload_t = decltype(make_overload<Types...>());
-    using type = decltype(std::declval<overload_t>()(std::declval<T>()));
+    using type = decltype(declval<overload_t>()(declval<T>()));
 };
 
 template<typename T>
@@ -47,12 +55,15 @@ struct best_match<T> {
     using type = void;
 };
 
+template<typename T, typename... Types>
+using best_match_t = typename best_match<T, Types...>::type;
+
 template<typename T, typename First, typename... Rest>
 constexpr size_t is_unique_helper() {
     if constexpr (sizeof...(Rest) == 0) {
-        return std::is_same_v<T, First> ? 1 : 0;
+        return is_same_v<T, First> ? 1 : 0;
     } else {
-        return (std::is_same_v<T, First> ? 1 : 0) + is_unique_helper<T, Rest...>();
+        return (is_same_v<T, First> ? 1 : 0) + is_unique_helper<T, Rest...>();
     }
 }
 
@@ -64,26 +75,25 @@ static constexpr bool is_unique() {
 template<typename T, typename T_j, typename... Types>
 concept variant_ctor_constraint =
     (sizeof...(Types) > 0) &&
-    (!std::same_as<std::remove_cvref_t<T>, my_variant<Types...>>) &&
+    (!std::same_as<std::remove_cvref_t<T>, variant<Types...>>) &&
     (!is_in_place_type_t<std::remove_cvref_t<T>>::value) &&
     (!is_in_place_index_t<std::remove_cvref_t<T>>::value) &&
-    std::is_constructible_v<typename best_match<T, Types...>::type, T> &&
+    is_constructible_v<T_j, T> &&
     requires (T&& args) {
         { make_overload<Types...>()(std::forward<T>(args)) };
     };
-
 }
 
 template<class... Types> class variant {
 public:
     // constructors
     //constexpr variant() noexcept(/* see description */);
-    //constexpr variant(const variant&);
-    //constexpr variant(variant&&) noexcept(/* see description */);
+    constexpr variant(const variant&);
+    constexpr variant(variant&&); //noexcept(/* see description */);
  
-    template<class T, typename T_j = typename best_match<T, Types...>::type>
-    requires variant_ctor_constraint<T, T_j, Types...>
-    constexpr variant(T&& args) noexcept(std::is_nothrow_constructible_v<T_j, T>) {
+    template<class T, typename T_j = impl_variant::best_match_t<T, Types...>>
+    requires impl_variant::variant_ctor_constraint<T, T_j, Types...>
+    constexpr variant(T&& args) noexcept(std::is_nothrow_constructible_v<impl_variant::best_match_t<remove_cvref_t<T>>, T>) {
         active_index = index_of<T_j>();
         new (&storage) T_j(std::forward<T>(args));
     }
@@ -99,13 +109,21 @@ public:
     //constexpr explicit variant(in_place_index_t<I>, initializer_list<U>, Args&&...);
  
     // destructor
-    constexpr ~variant();
+    constexpr ~variant() {
+        using dtor_func_t = void(*)(void*);
+        static constexpr dtor_func_t destructors[] = { 
+            [](void* p){ reinterpret_cast<Types*>(p)->~Types(); }...
+        };
+
+        if (active_index == -1) return;
+        destructors[active_index](&storage);
+    }
  
     // assignment
     constexpr variant& operator=(const variant&);
-    //constexpr variant& operator=(variant&&) noexcept(/* see description */);
+    constexpr variant& operator=(variant&&); // noexcept(/* see description */);
  
-    //template<class T> constexpr variant& operator=(T&&) noexcept(/* see description */);
+    template<class T> constexpr variant& operator=(T&&); //noexcept(/* see description */);
  
     // modifiers
     template<class T, class... Args> constexpr T& emplace(Args&&...);
@@ -131,22 +149,24 @@ public:
     constexpr R visit(this Self&&, Visitor&&);
 
 private:
-    using this_type = my_variant<Types...>;
-    static constexpr std::size_t alignment_value = std::max({alignof(Types)...});
+    static constexpr size_t max_size = max({sizeof(Types)...});
+    static constexpr size_t max_align = max({alignof(Types)...});
 
-    alignas(alignment_value) char storage[std::max({sizeof(Types)...})];
+    static constexpr size_t alignment_value = max_align;
+
+    alignas(alignment_value) char storage[max_size];
     size_t active_index;
 
     template<typename T, typename First, typename... Rest>
-    static constexpr std::size_t index_of_helper() {
-        if constexpr (std::is_same_v<T, First>) {
+    static constexpr size_t index_of_helper() {
+        if constexpr (is_same_v<T, First>) {
             return 0;
         } else if constexpr (sizeof...(Rest) == 0) {
-            return static_cast<std::size_t>(-1);  // nicht gefunden
+            return static_cast<size_t>(-1);  // nicht gefunden
         } else {
-            constexpr std::size_t next = index_of_helper<T, Rest...>();
-            if constexpr (next == static_cast<std::size_t>(-1)) {
-                return static_cast<std::size_t>(-1);
+            constexpr size_t next = index_of_helper<T, Rest...>();
+            if constexpr (next == static_cast<size_t>(-1)) {
+                return static_cast<size_t>(-1);
             } else {
                 return 1 + next;
             }
@@ -154,16 +174,23 @@ private:
     }
 
     template<typename T>
-    requires(is_unique<T, Types...>())
+    requires(impl_variant::is_unique<T, Types...>())
     static constexpr size_t index_of() {
         constexpr size_t index = index_of_helper<T, Types...>();
-        static_assert(index > 0, "index not found");
+        static_assert(index != static_cast<size_t>(-1), "index not found");
         return index;
     };
+
+    template<class T>
+    friend constexpr const T& get(const variant<Types...>& other) {
+        size_t index = index_of<T>();
+        //if (other.active_index != index) return std::make_exception_ptr(bad_variant_access());
+        return *reinterpret_cast<const T*>(other.storage);
+    }
 };
 
 template<class T, class... Types>
-constexpr bool holds_alternative(const std::variant<Types...>& v) noexcept;
+constexpr bool holds_alternative(const variant<Types...>& v) noexcept;
 
 //template<size_t I, class... Types>
 //constexpr variant_alternative_t<I, variant<Types...>>& get(variant<Types...>&);
@@ -178,8 +205,6 @@ template<class T, class... Types>
 constexpr T& get(variant<Types...>&);               // freestanding-deleted
 template<class T, class... Types>
 constexpr T&& get(variant<Types...>&&);             // freestanding-deleted
-template<class T, class... Types>
-constexpr const T& get(const variant<Types...>&);   // freestanding-deleted
 template<class T, class... Types>
 constexpr const T&& get(const variant<Types...>&&); // freestanding-deleted
 

@@ -1,1 +1,39 @@
 #pragma once
+
+#include <cstddef>
+
+namespace std {
+
+template<class E> class initializer_list {
+public:
+    using value_type      = E;
+    using reference       = const E&;
+    using const_reference = const E&;
+    using size_type       = size_t;
+ 
+    using iterator        = const E*;
+    using const_iterator  = const E*;
+ 
+    constexpr initializer_list() noexcept : m_iterator(0), m_len(0) {}
+ 
+    constexpr size_t size() const noexcept { return m_len; }                    // number of elements
+    constexpr const_iterator begin() const noexcept { return m_iterator; }      // first element
+    constexpr const_iterator end() const noexcept { return begin() + size(); }  // one past the last element
+
+private:
+    iterator m_iterator;
+    size_type m_len;
+
+    constexpr initializer_list(const_iterator iter, size_type len)
+        : m_iterator(iter), m_len(len) {}
+};
+ 
+    // initializer list range access
+    template<class E> constexpr const E* begin(initializer_list<E> il) noexcept {
+        return il.begin();
+    }
+
+    template<class E> constexpr const E* end(initializer_list<E> il) noexcept {
+        return il.end();
+    }
+}
