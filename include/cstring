@@ -4,6 +4,10 @@
 
 namespace std {
 
-size_t strlen(const char* start);
+/***********************/
+/* String examination  */
+/***********************/
+
+std::size_t strlen(const char* str);
 
 }

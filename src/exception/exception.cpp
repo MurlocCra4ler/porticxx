@@ -1,4 +1,4 @@
-#include <exception>
+#include <bits/exception/exception.hpp>
 
 namespace std {
 

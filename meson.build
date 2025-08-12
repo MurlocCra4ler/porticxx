@@ -19,7 +19,8 @@ else
 endif
 
 sources = files(
-    'src/exception.cpp',
+    'src/exception/exception.cpp',
+    'src/exception/exception_ptr.cpp',
     'src/iostream.cpp',
     'src/bin_allocator.cpp',
     'src/system_error.cpp',
@@ -30,6 +31,8 @@ sources = files(
     'src/ios/ios_base.cpp',
     'src/ostream/basic_ostream.cpp',
     'src/string/char_traits.cpp',
+    'src/arch/porticxx.cpp',
+    'src/cstring.cpp',
 )
 
 porticxx_lib = static_library(

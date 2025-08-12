@@ -2,6 +2,8 @@
 
 namespace arch {
 
+
+
 void exit(int code) {
     asm volatile(
         "mov %[code], %%rdi\n"
@@ -12,6 +14,11 @@ void exit(int code) {
         : "rax", "rdi"
     );
     __builtin_unreachable();
+}
+
+[[noreturn]] void abort_exception(std::exception_ptr err) {
+    //const char* msg = err
+    exit(1);
 }
 
 }
