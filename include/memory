@@ -1,7 +1,6 @@
 #pragma once
 
-#include <bits/memory/smart_pointers.hpp>
-#include <bits/memory/pointer_traits.hpp>
+#include <bits/memory/shared_pointer.hpp>
 #include <type_traits>
 
 namespace std {
