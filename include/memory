@@ -2,6 +2,7 @@
 
 #include <bits/memory/shared_pointer.hpp>
 #include <type_traits>
+#include <bits/memory/allocators.hpp>
 
 namespace std {
 

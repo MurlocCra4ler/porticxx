@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bits/streambuf/basic_streambuf.hpp>
+#include <bits/streambuf/basic_streambuf_char.hpp>
 
 namespace std {
 

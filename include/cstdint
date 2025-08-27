@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bits/type_traits/type_transformations.hpp>
+
 namespace std {
 
 typedef __INT8_TYPE__   int8_t;
@@ -12,6 +14,8 @@ typedef __UINT16_TYPE__  uint16_t;
 typedef __UINT32_TYPE__  uint32_t;
 typedef __UINT64_TYPE__  uint64_t;
 
+using uintptr_t = std::conditional_t<sizeof(void*) == 8, unsigned long long, unsigned int>;
+
 }
 
 using std::int8_t;
@@ -23,3 +27,7 @@ using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
+
+using std::uintptr_t;
+
+#define INT16_MAX __INT16_MAX__

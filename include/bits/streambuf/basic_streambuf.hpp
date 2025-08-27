@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <bits/string/char_traits.hpp>
 
 namespace std {
@@ -18,24 +19,46 @@ public:
     // buffer and positioning
     int pubsync();
 
+    // get and put areas
+    // get area
+    streamsize in_avail();
+    int_type snextc();
+    int_type sbumpc();
+    int_type sgetc();
+    streamsize sgetn(char_type* s, streamsize n);
+
     // put area
     int_type sputc(char_type c);
     streamsize sputn(const char_type* s, streamsize n);
 
 protected:
+    // get area access
+    char_type* eback() const { return m_eback; }
+    char_type* gptr()  const { return m_gptr; }
+    char_type* egptr() const { return m_egptr; }
+    void gbump(int n) { m_gptr += n; }
+
     // put area access
-    char_type* pbase() const;
-    char_type* pptr() const;
-    char_type* epptr() const;
-    void pbump(int n);
+    char_type* pbase() const { return m_pbase; }
+    char_type* pptr() const { return m_pptr; }
+    char_type* epptr() const { return m_epptr; }
+    void pbump(int n) { m_pptr += n; }
 
     // buffer management and positioning
     virtual int sync() { return 0; }
+
+    // get area
+    virtual int_type underflow();
+    virtual int_type uflow();
 
     // put area
     virtual int_type overflow(int_type c = Traits::eof());
 
 private:
+    char_type* m_eback = nullptr;
+    char_type* m_gptr = nullptr;
+    char_type* m_egptr = nullptr;
+
     char_type* m_pbase = nullptr;
     char_type* m_pptr = nullptr;
     char_type* m_epptr = nullptr;
@@ -49,6 +72,37 @@ template<class CharT, class Traits>
 int basic_streambuf<CharT, Traits>::pubsync() {
     return sync();
 }
+
+template<class CharT, class Traits>
+typename basic_streambuf<CharT, Traits>::int_type
+basic_streambuf<CharT, Traits>::snextc() {
+    if (gptr() < egptr()) {
+        gbump(1);
+        return gptr() < egptr() ? Traits::to_int_type(*gptr()) : uflow();
+    }
+
+    return uflow();
+}
+
+template<class CharT, class Traits>
+typename basic_streambuf<CharT, Traits>::int_type
+basic_streambuf<CharT,Traits>::sbumpc() {
+    if (gptr() < egptr()) {
+        typename Traits::int_type c = Traits::to_int_type(*gptr());
+        gbump(1);
+        return c;
+    }
+
+    return uflow();
+}
+
+template<class CharT, class Traits>
+typename basic_streambuf<CharT, Traits>::int_type
+basic_streambuf<CharT,Traits>::sgetc() {
+    if (gptr() < egptr()) return Traits::to_int_type(*gptr());
+    return underflow();
+}
+
 
 // public: put area
 template<class CharT, class Traits>
@@ -72,27 +126,6 @@ streamsize basic_streambuf<CharT, Traits>::sputn(const char_type* s, streamsize 
     }
 
     return written;
-}
-
-// protected: put area access
-template<class CharT, class Traits>
-basic_streambuf<CharT, Traits>::char_type* basic_streambuf<CharT, Traits>::pbase() const {
-    return m_pbase;
-}
-
-template<class CharT, class Traits>
-basic_streambuf<CharT, Traits>::char_type* basic_streambuf<CharT, Traits>::pptr() const {
-    return m_pptr;
-}
-
-template<class CharT, class Traits>
-basic_streambuf<CharT, Traits>::char_type* basic_streambuf<CharT, Traits>::epptr() const {
-    return m_epptr;
-}
-
-template<class CharT, class Traits>
-void basic_streambuf<CharT, Traits>::pbump(int n) {
-    m_pptr += n;
 }
 
 // protected: put area

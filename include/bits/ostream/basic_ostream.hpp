@@ -38,6 +38,7 @@ public:
     basic_ostream& operator<<(const void* p);
     basic_ostream& operator<<(const volatile void* p);
     basic_ostream& operator<<(nullptr_t);
+    basic_ostream& operator<<(basic_streambuf<char_type, Traits>* sb);
  
     // unformatted output
     result_ref<basic_ostream> put(char_type c);

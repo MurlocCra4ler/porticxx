@@ -63,4 +63,9 @@ constexpr T max(initializer_list<T> il) {
     return *max_element(il.begin(), il.end());
 }
 
+template<class T>
+constexpr const T& min(const T& a, const T& b) {
+    return a <= b ? a : b;
+}
+
 }

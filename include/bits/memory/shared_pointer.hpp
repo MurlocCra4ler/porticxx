@@ -119,6 +119,18 @@ public:
     shared_ptr& operator=(unique_ptr<Y, D>&& r);
 
     // observers
+    element_type* get() const noexcept {
+        return ptr;
+    }
+
+    T& operator*() const noexcept {
+        return *ptr;
+    }
+    
+    T* operator->() const noexcept {
+        return ptr;
+    }
+
     explicit operator bool() const noexcept {
         return ptr != nullptr;
     }
@@ -138,6 +150,9 @@ private:
         ctrl = nullptr;
         ptr = nullptr;
     }
+
+    template<class U, class... Args>
+    friend shared_ptr<U> make_shared(Args&&... args);
 };
 
 }

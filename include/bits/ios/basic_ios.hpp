@@ -10,6 +10,9 @@ namespace std {
 /* Class std::basic_ios */
 /************************/
 
+template<class CharT, class Traits>
+class basic_ostream; 
+
 template<class CharT, class Traits = char_traits<CharT>>
 class basic_ios : public ios_base {
 public:
@@ -20,13 +23,25 @@ public:
     using traits_type = Traits;
 
     // flags functions
+    explicit operator bool() const { return !fail(); }
     result<void> setstate(iostate state);
+    bool good() const { return (m_state & (failbit | badbit | eofbit)) == 0; }
+    bool eof() const { return (m_state & eofbit) != 0; }
+    bool fail() const { return (m_state & (failbit | badbit)) != 0; }
+    bool bad() const { return (m_state & badbit) != 0; }
 
     // constructor/destructor
     explicit basic_ios(basic_streambuf<CharT, Traits>* sb);
     virtual ~basic_ios();
 
     // members
+    basic_ostream<CharT, Traits>* tie() const { return m_tie; }
+    basic_ostream<CharT, Traits>* tie(basic_ostream<CharT, Traits>* tiestr) {
+        basic_ostream<CharT, Traits>* prev = m_tie;
+        m_tie = tiestr;
+        return prev;
+    }
+
     basic_streambuf<CharT, Traits>* rdbuf() const;
 
     char_type widen(char c) const;
@@ -35,7 +50,8 @@ private:
     iostate m_state = goodbit;
     iostate m_exceptions = goodbit;
 
-    basic_streambuf<CharT, Traits>* m_rdbuf;
+    basic_streambuf<CharT, Traits>* m_rdbuf = nullptr;
+    basic_ostream<CharT, Traits>* m_tie = nullptr;
 };
 
 // flags functions

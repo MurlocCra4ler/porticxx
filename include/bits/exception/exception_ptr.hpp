@@ -18,6 +18,14 @@ public:
 
     void abort() const;
 
+    exception& operator*() const noexcept {
+        return *m_ptr;
+    }
+
+    exception* operator->() const noexcept {
+        return m_ptr.get();
+    }
+
 private:
     shared_ptr<exception> m_ptr;
 };
@@ -25,7 +33,7 @@ private:
 template<class E>
 constexpr exception_ptr make_exception_ptr(E e) noexcept {
     static_assert(is_base_of_v<exception, E>, "E must derive from std::exception");
-    return exception_ptr(make_shared<exception>(move(e)));
+    return exception_ptr(make_shared<exception>(std::move(e)));
 }
 
 }

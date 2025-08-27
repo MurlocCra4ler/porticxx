@@ -1,12 +1,12 @@
 #pragma once
 
 #include <cstddef>
-//#include <memory>
 #include <bits/type_traits/helpers.hpp>
 #include <bits/type_traits/type_transformations.hpp>
 #include <bits/type_traits/sign_mods.hpp>
 
 #include <bits/memory/pointer_traits.hpp>
+#include <bits/memory/obj_allocator.hpp>
 
 namespace std {
 
@@ -23,21 +23,28 @@ struct allocation_result {
 template<class T>
 class allocator {
 public:
-    using value_type                             = T;
-    using size_type                              = size_t;
-    using difference_type                        = ptrdiff_t;
+    using value_type = T;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
     using propagate_on_container_move_assignment = true_type;
  
-    constexpr allocator() noexcept;
-    constexpr allocator(const allocator&) noexcept;
+    constexpr allocator() noexcept = default;
+    constexpr allocator(const allocator&) noexcept = default;
     template<class U>
     constexpr allocator(const allocator<U>&) noexcept;
-    constexpr ~allocator();
+    constexpr ~allocator() = default;
     constexpr allocator& operator=(const allocator&) = default;
  
-    constexpr T* allocate(size_t n);
+    constexpr T* allocate(size_t n) {
+        auto& impl = impl_allocator::obj_allocator<T>::instance();
+        return impl.allocate(n);
+    }
+
     constexpr allocation_result<T*> allocate_at_least(size_t n);
-    constexpr void deallocate(T* p, size_t n);
+    constexpr void deallocate(T* p, size_t n) {
+        auto& impl = impl_allocator::obj_allocator<T>::instance();
+        impl.deallocate(p, n);
+    }
 };
 
 namespace impl_allocators {

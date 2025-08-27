@@ -3,6 +3,7 @@
 #include <bits/memory/allocators.hpp>
 #include <bits/iterator/primitives.hpp>
 #include <bits/string/char_traits.hpp>
+#include <bits/iterator/adaptor_classes.hpp>
 
 namespace std {
 
@@ -18,8 +19,8 @@ public:
     using const_reference        = const value_type&;
     using const_iterator         = const CharT*;
     using iterator               = const_iterator;
-    //using const_reverse_iterator = reverse_iterator<const_iterator>;
-    //using reverse_iterator       = const_reverse_iterator;
+    using const_reverse_iterator = reverse_iterator<const_iterator>;
+    using reverse_iterator       = const_reverse_iterator;
     using size_type              = size_t;
     using difference_type        = ptrdiff_t;
     static constexpr size_type npos = size_type(-1);
@@ -30,15 +31,15 @@ public:
     constexpr basic_string_view& operator=(const basic_string_view&) noexcept = default;
     constexpr basic_string_view(const CharT* str);
     constexpr basic_string_view(nullptr_t) = delete;
-    constexpr basic_string_view(const CharT* str, size_type len);
+    constexpr basic_string_view(const CharT* str, size_type len) : m_data(str), m_size(len) {}
     template<class It, class End>
         constexpr basic_string_view(It begin, End end);
-    template<class R>
-        constexpr explicit basic_string_view(R&& r);
+    //template<class R>
+    //    constexpr explicit basic_string_view(R&& r) ;
 
     // iterator support
-    constexpr const_iterator begin() const noexcept;
-    constexpr const_iterator end() const noexcept;
+    constexpr const_iterator begin() const noexcept { return m_data; }
+    constexpr const_iterator end() const noexcept { return m_data + m_size; }
     constexpr const_iterator cbegin() const noexcept;
     constexpr const_iterator cend() const noexcept;
     //constexpr const_reverse_iterator rbegin() const noexcept;
@@ -123,8 +124,8 @@ public:
     constexpr size_type find_last_not_of(const CharT* s, size_type pos = npos) const;
 
 private:
-    const_pointer data_;
-    size_type size_;
+    const_pointer m_data;
+    size_type m_size;
 };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <bits/string/basic_string.hpp>
 #include <stdexcept>
 
 namespace std {

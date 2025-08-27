@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bits/istream/basic_istream.hpp>
+#include <bits/istream/basic_istream_sentry.hpp>
 
 namespace std {
 
