@@ -10,10 +10,25 @@ struct x86_64_arch : public default_arch {
     static constexpr size_t NUM_PAGES = 1 << 16;
     static constexpr size_t MAX_SEGMENTS = 1 << 14;
 
-    // io-operations:
+    // io-operations
     static ptrdiff_t stdout_write(const void* data, size_t count);
     static ptrdiff_t stderr_write(const void* data, size_t count);
     static ptrdiff_t stdin_read(void* buffer, size_t count);
+
+    // threads
+    using thread_handle_type = struct {
+        int tid;
+        int* clear_tid;
+        void* stack_base;
+        size_t stack_size;
+    };
+
+    static thread_handle_type thread_create(void* (*start)(void*), void* arg);
+    static void thread_join(thread_handle_type h, void** retval);
+    static void thread_detach(thread_handle_type h);
+
+    // synchronization
+    
 
     // runtime
     [[noreturn]] static void exit(int exit_code);

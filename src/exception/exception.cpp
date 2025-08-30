@@ -6,4 +6,8 @@ const char* exception::what() const noexcept {
     return "exception";    
 }
 
+[[noreturn]] void terminate() noexcept {
+    __builtin_trap();
+}
+
 }

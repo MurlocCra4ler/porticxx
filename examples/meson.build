@@ -12,3 +12,8 @@ executable('allocator_test',
            'allocator_test.cpp',
            dependencies: porticxx_dep,
            cpp_args: ['-D' + arch_define])
+
+executable('thread_test',
+           'thread_test.cpp',
+           dependencies: porticxx_dep,
+           cpp_args: ['-D' + arch_define])

@@ -48,6 +48,30 @@ struct arch_base {
         return Derived::stdin_read(buffer, count);
     }
 
+    // threads
+    using thread_handle_type = Derived::thread_handle_type;
+
+    static thread_handle_type thread_create(void* (*start)(void*), void* arg) {
+        return Derived::thread_create(start, arg);
+    }
+
+    static void thread_join(thread_handle_type h, void** retval) {
+        return Derived::thread_join(h, retval);
+    }
+
+    static void thread_detach(thread_handle_type h) {
+        return Derived::thread_detach(h);
+    }
+
+    static void thread_yield() {
+        return Derived::thread_yield();
+    }
+
+    // synchronization
+    inline static bool atomic_compare_exchange(int& ref, int& expected, int desired) {
+        return Derived::atomic_compare_exchange(ref, expected, desired);
+    }
+
     // syscalls
     [[noreturn]] static void exit(int exit_code) {
         Derived::exit(exit_code);

@@ -157,6 +157,9 @@ public:
 };
 
 template<class T>
+using decay_t = typename decay<T>::type;
+
+template<class T>
 struct remove_cvref {
     using type = std::remove_cv_t<std::remove_reference_t<T>>;
 };

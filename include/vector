@@ -1,7 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <iterator>
 #include <bits/memory/allocators.hpp>
+#include <utility>
 
 namespace std {
 
@@ -14,6 +16,7 @@ public:
     using const_pointer             = typename allocator_traits<Allocator>::const_pointer;
     using reference                 = value_type&;
     using const_reference           = const value_type&;
+    using size_type                 = size_t;
     using iterator                  = value_type*;
     using const_iterator            = const value_type*;
     using reverse_iterator          = std::reverse_iterator<iterator>;
@@ -29,19 +32,62 @@ public:
     constexpr const_iterator cend() const noexcept;
 
     // element access
+    constexpr reference operator[](size_type n) { return m_data[n]; }
+    constexpr const_reference operator[](size_type n) const { return m_data[n]; }
     constexpr reference front();
 
     // modifiers
     template<class... Args>
     constexpr reference emplace_back(Args&&... args);
-    constexpr void push_back(const T& x);
-    constexpr void push_back(T&& x);
+    
+    constexpr void push_back(const T& x) {
+        if (m_capacity == m_size) {
+            size_t new_capacity = m_capacity ? m_capacity * 2 : 1;
+            T* ptr = allocator.allocate(new_capacity);
+
+            for (size_t i = 0; i < m_size; ++i)
+                new(ptr + i) T(std::move_if_noexcept(m_data[i]));
+
+            for (size_t i = 0; i < m_size; ++i)
+                m_data[i].~T();
+
+            allocator.deallocate(m_data, m_capacity);
+            
+            m_data = ptr;
+            m_capacity = new_capacity;
+        }
+
+        m_data[m_size++] = x;
+    }
+
+    constexpr void push_back(T&& x) {
+        if (m_capacity == m_size) {
+            size_t new_capacity = m_capacity ? m_capacity * 2 : 1;
+            T* ptr = allocator.allocate(new_capacity);
+
+            for (size_t i = 0; i < m_size; ++i)
+                new(ptr + i) T(std::move_if_noexcept(m_data[i]));
+
+            for (size_t i = 0; i < m_size; ++i)
+                m_data[i].~T();
+
+            allocator.deallocate(m_data, m_capacity);
+            
+            m_data = ptr;
+            m_capacity = new_capacity;
+        }
+
+        m_data[m_size++] = std::move(x);
+    }
 
     constexpr void clear() noexcept;
 
 private:
+    allocator_type allocator;
+
     T* m_data = nullptr;
     size_t m_size = 0;
+    size_t m_capacity = 0;
 };
 
 }

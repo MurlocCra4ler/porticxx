@@ -15,6 +15,8 @@ elif arch_name == 'x86_64'
     arch_sources += files(
         'src/arch/x86_64/runtime.cpp',
         'src/arch/x86_64/io.cpp',
+        'src/arch/x86_64/thread.cpp',
+        'src/arch/x86_64/sys_call.s',
     )
     arch_define = 'ARCH_X86_64'
 else
@@ -37,6 +39,7 @@ sources = files(
     'src/string/char_traits.cpp',
     'src/porticxx/runtime.cpp',
     'src/cstring.cpp',
+    'src/thread/thread.cpp',
 )
 
 porticxx_lib = static_library(
