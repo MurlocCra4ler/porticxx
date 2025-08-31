@@ -28,7 +28,17 @@ struct x86_64_arch : public default_arch {
     static void thread_detach(thread_handle_type h);
 
     // synchronization
-    
+    inline static int atomic_load(int& ref) { return __atomic_load_n(&ref, __ATOMIC_SEQ_CST); }
+    inline static void atomic_store(int& ref, int val) { __atomic_store_n(&ref, val, __ATOMIC_SEQ_CST); }
+    inline static int atomic_exchange(int& ref, int val) {
+        return __atomic_exchange_n(&ref, val, __ATOMIC_SEQ_CST);
+    }
+    inline static bool atomic_compare_exchange(int& ref, int& expected, int desired) {
+        return __atomic_compare_exchange_n(&ref, &expected, desired, true, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    }
+    inline static int atomic_fetch_add(int& ref, int val) { 
+        return __atomic_fetch_add(&ref, val, __ATOMIC_SEQ_CST);
+    }
 
     // runtime
     [[noreturn]] static void exit(int exit_code);

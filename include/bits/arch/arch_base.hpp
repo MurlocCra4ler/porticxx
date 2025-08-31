@@ -68,8 +68,24 @@ struct arch_base {
     }
 
     // synchronization
+    inline static int atomic_load(int& ref) {
+        return Derived::atomic_load(ref);
+    }
+
+    inline static void atomic_store(int& ref, int val) {
+        Derived::atomic_store(ref, val);
+    }
+
+    inline static int atomic_exchange(int& ref, int val) {
+        Derived::atomic_exchange(ref, val);
+    }
+
     inline static bool atomic_compare_exchange(int& ref, int& expected, int desired) {
         return Derived::atomic_compare_exchange(ref, expected, desired);
+    }
+
+    inline static int  atomic_fetch_add(int& ref, int val) {
+        return Derived::atomic_fetch_add(ref, val);
     }
 
     // syscalls

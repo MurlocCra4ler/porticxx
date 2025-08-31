@@ -1,8 +1,15 @@
+#include "bits/arch/arch.hpp"
 #include <cstdint>
 #include <cstring>
 #include <bits/arch/default_arch.hpp>
+#include <bits/exception/exception.hpp>
+#include <exception>
 
 namespace std::arch {
+
+const char* bad_arch_function::what() const noexcept {
+    return "current_arch does not implement required function";
+}
 
 std::ptrdiff_t default_arch::stdout_write(const void*, std::size_t count) {
     return count;
@@ -70,6 +77,41 @@ void* default_arch::memset(void* dst, int value, std::size_t n) {
     }
 
     return dst;
+}
+
+int default_arch::atomic_load(int& ref) {
+    int expected = ref;
+    current_arch::atomic_compare_exchange(ref, expected, expected);
+    return expected;
+}
+
+void default_arch::atomic_store(int& ref, int val) {
+    int old = ref;
+    while (!current_arch::atomic_compare_exchange(ref, old, val)) {
+        old = ref;
+    }
+}
+
+int default_arch::atomic_exchange(int& ref, int val) {
+    int old = ref;
+    while (!current_arch::atomic_compare_exchange(ref, old, val)) {}
+    return old;
+}
+
+bool default_arch::atomic_compare_exchange(int &ref, int &expected, int desired) {
+    bad_arch_function e;
+    make_exception_ptr(e).abort();
+    return false;
+}
+
+int  default_arch::atomic_fetch_add(int& ref, int val) {
+    int old = ref;
+    while (true) {
+        int desired = old + val;
+        if (current_arch::atomic_compare_exchange(ref, old, desired)) {
+            return old;
+        }
+    }
 }
 
 [[noreturn]] void default_arch::exit(int exit_code) {
