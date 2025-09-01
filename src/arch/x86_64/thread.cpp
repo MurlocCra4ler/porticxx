@@ -49,7 +49,7 @@ static inline int sys_futex(int* uaddr, int futex_op, int val,
 }
 
 int futex_wait(int* addr, int val) {
-    return sys_futex(addr, FUTEX_WAIT | FUTEX_PRIVATE_FLAG, val);
+    return sys_futex(addr, FUTEX_WAIT, val);
 }
 
 extern "C" long _sys_clone(long flags, long child_sp, long parent_tid, long child_tid, long);
@@ -81,8 +81,7 @@ x86_64_arch::thread_handle_type x86_64_arch::thread_create(void* (*start)(void*)
     *child_tid = 1;
 
     unsigned long flags = CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND |
-                          CLONE_SYSVSEM | CLONE_THREAD |
-                          CLONE_CHILD_SETTID | CLONE_CHILD_CLEARTID;
+                          CLONE_SYSVSEM | CLONE_THREAD | CLONE_CHILD_CLEARTID;
 
     long rc = _sys_clone(
         static_cast<long>(flags),
