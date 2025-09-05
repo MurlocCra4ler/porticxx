@@ -37,30 +37,51 @@ public:
 
     // iostate
     using iostate = uint8_t;
-    static constexpr iostate badbit     = 1 << 0;
-    static constexpr iostate eofbit     = 1 << 1;
-    static constexpr iostate failbit    = 1 << 2;
-    static constexpr iostate goodbit    = 0;
+    static constexpr iostate badbit = 1 << 0;
+    static constexpr iostate eofbit = 1 << 1;
+    static constexpr iostate failbit = 1 << 2;
+    static constexpr iostate goodbit = 0;
 
     // fmtflags state
-    fmtflags flags() const { return m_flags; }
+    fmtflags flags() const { return flags_; }
+    fmtflags flags(fmtflags fmtfl) {
+        fmtflags old = flags_;
+        flags_ = fmtfl;
+        return old;
+    }
+    fmtflags setf(fmtflags fmtfl);
+    fmtflags setf(fmtflags fmtfl, fmtflags mask);
+    void unsetf(fmtflags mask);
+
+    streamsize precision() const;
+    streamsize precision(streamsize prec) {
+        streamsize old = prec_;
+        prec_ = prec;
+        return old;
+    }
+    streamsize width() const;
+    streamsize width(streamsize wide) {
+        streamsize old = width_;
+        width_ = wide;
+        return old;
+    }
 
     // locales
     locale imbue(const locale& loc) {
-        locale prev = m_locale;
-        m_locale = loc;
-        return prev;
+        locale old = loc_;
+        loc_ = loc;
+        return old;
     }
-    locale getloc() const { return m_locale; }
+    locale getloc() const { return loc_; }
 
 private:
-    fmtflags m_flags;
-    locale m_locale;
+    fmtflags flags_;
+    streamsize prec_;
+    streamsize width_;
+    locale loc_;
 };
 
-enum class io_errc {
-    stream = 1
-};
+enum class io_errc { stream = 1 };
 
 class ios_base::failure : public system_error {
 public:
@@ -68,4 +89,4 @@ public:
     explicit failure(const char* msg, const error_code& ec = io_errc::stream);
 };
 
-}
+} // namespace std

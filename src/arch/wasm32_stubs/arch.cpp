@@ -3,8 +3,6 @@
 
 namespace arch {
 
-void exit(int exit_code) {
-    wasm32_stubs::exit(exit_code);
-}
+void exit(int exit_code) { wasm32_stubs::exit(exit_code); }
 
-}
+} // namespace arch

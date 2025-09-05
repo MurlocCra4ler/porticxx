@@ -1,9 +1,10 @@
-#include "bits/arch/arch.hpp"
-#include <cstdint>
-#include <cstring>
 #include <bits/arch/default_arch.hpp>
 #include <bits/exception/exception.hpp>
+#include <cstdint>
+#include <cstring>
 #include <exception>
+
+#include "bits/arch/arch.hpp"
 
 namespace std::arch {
 
@@ -19,9 +20,7 @@ std::ptrdiff_t default_arch::stderr_write(const void*, std::size_t count) {
     return count;
 }
 
-std::ptrdiff_t default_arch::stdin_read(void*, std::size_t count) {
-    return 0;
-}
+std::ptrdiff_t default_arch::stdin_read(void*, std::size_t count) { return 0; }
 
 void* default_arch::memcpy(void* dst, const void* src, std::size_t n) {
     unsigned char* d_byte = static_cast<unsigned char*>(dst);
@@ -35,7 +34,8 @@ void* default_arch::memcpy(void* dst, const void* src, std::size_t n) {
     }
 
     unsigned long* d_word = reinterpret_cast<unsigned long*>(d_byte);
-    const unsigned long* s_word = reinterpret_cast<const unsigned long*>(s_byte);
+    const unsigned long* s_word =
+        reinterpret_cast<const unsigned long*>(s_byte);
     while (n >= word_size) {
         *d_word++ = *s_word++;
         n -= word_size;
@@ -53,7 +53,7 @@ void* default_arch::memcpy(void* dst, const void* src, std::size_t n) {
 void* default_arch::memset(void* dst, int value, std::size_t n) {
     unsigned char* byte_ptr = static_cast<unsigned char*>(dst);
     unsigned char byte = static_cast<unsigned char>(value);
-    
+
     constexpr size_t word_size = sizeof(unsigned long);
     while (n > 0 && (reinterpret_cast<uintptr_t>(byte_ptr) % word_size != 0)) {
         *byte_ptr++ = byte;
@@ -94,17 +94,19 @@ void default_arch::atomic_store(int& ref, int val) {
 
 int default_arch::atomic_exchange(int& ref, int val) {
     int old = ref;
-    while (!current_arch::atomic_compare_exchange(ref, old, val)) {}
+    while (!current_arch::atomic_compare_exchange(ref, old, val)) {
+    }
     return old;
 }
 
-bool default_arch::atomic_compare_exchange(int &ref, int &expected, int desired) {
+bool default_arch::atomic_compare_exchange(int& ref, int& expected,
+                                           int desired) {
     bad_arch_function e;
     make_exception_ptr(e).abort();
     return false;
 }
 
-int  default_arch::atomic_fetch_add(int& ref, int val) {
+int default_arch::atomic_fetch_add(int& ref, int val) {
     int old = ref;
     while (true) {
         int desired = old + val;
@@ -114,15 +116,16 @@ int  default_arch::atomic_fetch_add(int& ref, int val) {
     }
 }
 
-[[noreturn]] void default_arch::exit(int exit_code) {
-    __builtin_trap();
-}
+[[noreturn]] void default_arch::exit(int exit_code) { __builtin_trap(); }
 
-[[noreturn]] void default_arch::terminate_on_exception(std::exception_ptr exception) {
+[[noreturn]] void default_arch::abort() { __builtin_trap(); }
+
+[[noreturn]] void
+default_arch::terminate_on_exception(std::exception_ptr exception) {
     const char* msg = exception->what();
     std::size_t count = std::strlen(msg);
     stderr_write(msg, count);
     exit(-1);
 }
 
-}
+} // namespace std::arch

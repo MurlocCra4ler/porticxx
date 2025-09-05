@@ -17,3 +17,8 @@ executable('thread_test',
            'thread_test.cpp',
            dependencies: porticxx_dep,
            cpp_args: ['-D' + arch_define])
+
+executable('unordered_map_test',
+           'unordered_map_test.cpp',
+           dependencies: porticxx_dep,
+           cpp_args: ['-D' + arch_define])

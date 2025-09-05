@@ -22,15 +22,13 @@ extern "C" void _start() {
 namespace std::arch {
 
 [[noreturn]] void x86_64_arch::exit(int code) {
-    asm volatile(
-        "mov %[code], %%rdi\n"
-        "mov $60, %%rax\n"
-        "syscall\n"
-        :
-        : [code] "r"(static_cast<long>(code))
-        : "rax", "rdi"
-    );
+    asm volatile("mov %[code], %%rdi\n"
+                 "mov $60, %%rax\n"
+                 "syscall\n"
+                 :
+                 : [code] "r"(static_cast<long>(code))
+                 : "rax", "rdi");
     __builtin_unreachable();
 }
 
-}
+} // namespace std::arch

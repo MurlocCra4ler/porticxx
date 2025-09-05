@@ -15,13 +15,9 @@ struct syscall_descriptor {
     int args[8];
 } static descriptor;
 
-extern "C" void* get_syscall_descriptor() {
-    return &descriptor;
-}
+extern "C" void* get_syscall_descriptor() { return &descriptor; }
 
-void dispatch_syscall() {
-    runtime_yield();
-}
+void dispatch_syscall() { runtime_yield(); }
 
 void exit(int exit_code) {
     descriptor.id = syscall_id::exit;
@@ -30,4 +26,4 @@ void exit(int exit_code) {
     __builtin_unreachable();
 }
 
-}
+} // namespace wasm32_stubs

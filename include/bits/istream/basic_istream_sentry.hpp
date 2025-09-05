@@ -4,12 +4,14 @@
 
 namespace std {
 
-template<class CharT, class Traits>
+template <class CharT, class Traits>
 class basic_istream<CharT, Traits>::sentry {
 public:
     explicit sentry(basic_istream& is, bool noskipws = false) : m_ok(false) {
-        if (!is.good()) return;
-        if (auto* tied = is.tie()) tied->flush();
+        if (!is.good())
+            return;
+        if (auto* tied = is.tie())
+            tied->flush();
 
         if (!noskipws && (is.flags() & ios_base::skipws)) {
             auto& inbuf = *is.rdbuf();
@@ -36,4 +38,4 @@ private:
     bool m_ok;
 };
 
-}
+} // namespace std

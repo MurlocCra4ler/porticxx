@@ -8,8 +8,8 @@ namespace std {
 
 template<class Facet>
 const Facet& use_facet(const std::locale& loc) {
-    static Facet f;
-    return f;
+    static Facet* f = new Facet;
+    return *f;
 }
 
 template<class CharT>

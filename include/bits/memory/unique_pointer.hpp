@@ -4,10 +4,9 @@
 
 namespace std {
 
-template<class T, class D = default_delete<T>>
-class unique_ptr {
+template <class T, class D = default_delete<T>> class unique_ptr {
 public:
-    using pointer      = T*;
+    using pointer = T*;
     using element_type = T;
     using deleter_type = D;
 
@@ -15,7 +14,10 @@ public:
     explicit unique_ptr(pointer p) noexcept : m_ptr(p) {}
 
     // destructor
-    constexpr ~unique_ptr() { if (m_ptr) m_deleter(m_ptr); }
+    constexpr ~unique_ptr() {
+        if (m_ptr)
+            m_deleter(m_ptr);
+    }
 
     // observers
     constexpr pointer operator->() const noexcept { return m_ptr; }
@@ -25,4 +27,4 @@ private:
     deleter_type m_deleter;
 };
 
-}
+} // namespace std

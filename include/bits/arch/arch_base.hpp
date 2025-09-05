@@ -1,28 +1,23 @@
 #pragma once
 
+#include <bits/exception/exception_ptr.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <bits/exception/exception_ptr.hpp>
 
 namespace std::arch {
 
-template<typename Derived>
-struct arch_base {
+template <typename Derived> struct arch_base {
     // memory layout
-    static constexpr std::size_t num_pages() {
-        return Derived::NUM_PAGES;
-    }
+    static constexpr std::size_t num_pages() { return Derived::NUM_PAGES; }
 
-    static constexpr std::size_t page_size() {
-        return Derived::PAGE_SIZE;
-    }
+    static constexpr std::size_t page_size() { return Derived::PAGE_SIZE; }
 
     static constexpr std::size_t max_segments() {
         return Derived::MAX_SEGMENTS;
     }
 
     static constexpr uint8_t* heap() {
-        static uint8_t heap[num_pages()*page_size()];
+        static uint8_t heap[num_pages() * page_size()];
         return heap;
     }
 
@@ -63,9 +58,7 @@ struct arch_base {
         return Derived::thread_detach(h);
     }
 
-    static void thread_yield() {
-        return Derived::thread_yield();
-    }
+    static void thread_yield() { return Derived::thread_yield(); }
 
     // synchronization
     inline static int atomic_load(int& ref) {
@@ -80,23 +73,25 @@ struct arch_base {
         Derived::atomic_exchange(ref, val);
     }
 
-    inline static bool atomic_compare_exchange(int& ref, int& expected, int desired) {
+    inline static bool atomic_compare_exchange(int& ref, int& expected,
+                                               int desired) {
         return Derived::atomic_compare_exchange(ref, expected, desired);
     }
 
-    inline static int  atomic_fetch_add(int& ref, int val) {
+    inline static int atomic_fetch_add(int& ref, int val) {
         return Derived::atomic_fetch_add(ref, val);
     }
 
-    // syscalls
-    [[noreturn]] static void exit(int exit_code) {
-        Derived::exit(exit_code);
-    }
+    // runtime
+    [[noreturn]] static void exit(int exit_code) { Derived::exit(exit_code); }
+
+    [[noreturn]] static void abort() { Derived::abort(); }
 
     // excptions
-    [[noreturn]] static void terminate_on_exception(std::exception_ptr exception) {
+    [[noreturn]] static void
+    terminate_on_exception(std::exception_ptr exception) {
         Derived::terminate_on_exception(exception);
     }
 };
 
-}
+} // namespace std::arch

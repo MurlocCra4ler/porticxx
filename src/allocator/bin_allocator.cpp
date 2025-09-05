@@ -55,9 +55,7 @@ bin_allocator::bin_allocator() {
     }
 }
 
-bool bin_allocator::allocate(uint32_t size, memory_descriptor& result) {
-    
-}
+bool bin_allocator::allocate(uint32_t size, memory_descriptor& result) {}
 
 void bin_allocator::free(memory_descriptor& memory) {
     uint16_t pages_allocated = memory.size / PAGE_SIZE;
@@ -78,7 +76,8 @@ bool bin_allocator::grow(memory_descriptor& memory) {
         return false;
     }
 
-    int right_idx = NodeDescriptor::get_right(NodeDescriptor::get_parent(memory.idx));
+    int right_idx =
+        NodeDescriptor::get_right(NodeDescriptor::get_parent(memory.idx));
     if (right_idx == memory.idx) {
         return false;
     }
@@ -102,20 +101,20 @@ bool bin_allocator::grow(memory_descriptor& memory) {
 
     memory.idx = NodeDescriptor::get_parent(memory.idx);
     memory.size <<= 1;
-    
+
     return true;
 }
 
 void bin_allocator::shrink(memory_descriptor& memory) {
     int left_idx = NodeDescriptor::get_left(memory.idx);
 
-    if (left_idx >= NUM_NODES) { 
+    if (left_idx >= NUM_NODES) {
         return;
     }
 
     int node_idx = left_idx;
     NodeDescriptor* node = &nodes[node_idx];
-    
+
     uint32_t allocated_pages = node->free_pages;
     node->free_pages = 0;
 
@@ -129,4 +128,4 @@ void bin_allocator::shrink(memory_descriptor& memory) {
     memory.size = allocated_pages * PAGE_SIZE;
 }
 
-}
+} // namespace std::impl

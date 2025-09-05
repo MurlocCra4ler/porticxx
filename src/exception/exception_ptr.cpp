@@ -1,5 +1,5 @@
-#include <bits/exception/exception_ptr.hpp>
 #include <bits/arch/arch.hpp>
+#include <bits/exception/exception_ptr.hpp>
 
 extern "C" [[noreturn]] void pcxx_terminate_on_exception(std::exception_ptr);
 
@@ -12,4 +12,4 @@ void exception_ptr::abort() const {
     arch::current_arch::terminate_on_exception(*this);
 }
 
-}
+} // namespace std

@@ -27,6 +27,7 @@ sources = files(
     'src/exception/exception.cpp',
     'src/exception/exception_ptr.cpp',
     'src/iostream/cout.cpp',
+    'src/iostream/cerr.cpp',
     'src/iostream/cin.cpp',
     #'src/allocator/bin_allocator.cpp',
     'src/system_error.cpp',
@@ -39,6 +40,7 @@ sources = files(
     'src/string/char_traits.cpp',
     'src/porticxx/runtime.cpp',
     'src/cstring.cpp',
+    'src/cstdlib.cpp',
     'src/thread/thread.cpp',
     'src/mutex/mutex.cpp',
 )

@@ -5,15 +5,15 @@
 
 namespace std {
 
-template<class CharT, class Traits = char_traits<CharT>>
+template <class CharT, class Traits = char_traits<CharT>>
 class basic_streambuf {
 public:
-    using char_type   = CharT;
-    using int_type    = typename Traits::int_type;
-    using pos_type    = typename Traits::pos_type;
-    using off_type    = typename Traits::off_type;
+    using char_type = CharT;
+    using int_type = typename Traits::int_type;
+    using pos_type = typename Traits::pos_type;
+    using off_type = typename Traits::off_type;
     using traits_type = Traits;
- 
+
     virtual ~basic_streambuf();
 
     // buffer and positioning
@@ -34,7 +34,7 @@ public:
 protected:
     // get area access
     char_type* eback() const { return m_eback; }
-    char_type* gptr()  const { return m_gptr; }
+    char_type* gptr() const { return m_gptr; }
     char_type* egptr() const { return m_egptr; }
     void gbump(int n) { m_gptr += n; }
 
@@ -64,16 +64,16 @@ private:
     char_type* m_epptr = nullptr;
 };
 
-template<class CharT, class Traits>
+template <class CharT, class Traits>
 basic_streambuf<CharT, Traits>::~basic_streambuf() = default;
 
 // public: buffer and positioning
-template<class CharT, class Traits>
+template <class CharT, class Traits>
 int basic_streambuf<CharT, Traits>::pubsync() {
     return sync();
 }
 
-template<class CharT, class Traits>
+template <class CharT, class Traits>
 typename basic_streambuf<CharT, Traits>::int_type
 basic_streambuf<CharT, Traits>::snextc() {
     if (gptr() < egptr()) {
@@ -84,9 +84,9 @@ basic_streambuf<CharT, Traits>::snextc() {
     return uflow();
 }
 
-template<class CharT, class Traits>
+template <class CharT, class Traits>
 typename basic_streambuf<CharT, Traits>::int_type
-basic_streambuf<CharT,Traits>::sbumpc() {
+basic_streambuf<CharT, Traits>::sbumpc() {
     if (gptr() < egptr()) {
         typename Traits::int_type c = Traits::to_int_type(*gptr());
         gbump(1);
@@ -96,17 +96,18 @@ basic_streambuf<CharT,Traits>::sbumpc() {
     return uflow();
 }
 
-template<class CharT, class Traits>
+template <class CharT, class Traits>
 typename basic_streambuf<CharT, Traits>::int_type
-basic_streambuf<CharT,Traits>::sgetc() {
-    if (gptr() < egptr()) return Traits::to_int_type(*gptr());
+basic_streambuf<CharT, Traits>::sgetc() {
+    if (gptr() < egptr())
+        return Traits::to_int_type(*gptr());
     return underflow();
 }
 
-
 // public: put area
-template<class CharT, class Traits>
-basic_streambuf<CharT, Traits>::int_type basic_streambuf<CharT, Traits>::sputc(char_type c) {
+template <class CharT, class Traits>
+basic_streambuf<CharT, Traits>::int_type
+basic_streambuf<CharT, Traits>::sputc(char_type c) {
     if (pptr() < epptr()) {
         *pptr() = c;
         pbump(1);
@@ -116,12 +117,15 @@ basic_streambuf<CharT, Traits>::int_type basic_streambuf<CharT, Traits>::sputc(c
     }
 }
 
-template<class CharT, class Traits>
-streamsize basic_streambuf<CharT, Traits>::sputn(const char_type* s, streamsize n) {
+template <class CharT, class Traits>
+streamsize basic_streambuf<CharT, Traits>::sputn(const char_type* s,
+                                                 streamsize n) {
     streamsize written = 0;
     for (; written < n; ++written) {
-        if (traits_type::eq_int_type(overflow(traits_type::to_int_type(s[written])), traits_type::eof())) {
-            break; 
+        if (traits_type::eq_int_type(
+                overflow(traits_type::to_int_type(s[written])),
+                traits_type::eof())) {
+            break;
         }
     }
 
@@ -129,13 +133,14 @@ streamsize basic_streambuf<CharT, Traits>::sputn(const char_type* s, streamsize 
 }
 
 // protected: put area
-template<class CharT, class Traits>
-basic_streambuf<CharT, Traits>::int_type basic_streambuf<CharT, Traits>::overflow(int_type c) {
+template <class CharT, class Traits>
+basic_streambuf<CharT, Traits>::int_type
+basic_streambuf<CharT, Traits>::overflow(int_type c) {
     if (traits_type::eq_int_type(c, traits_type::eof())) {
         return traits_type::not_eof(c);
     }
-    
+
     return c;
 }
 
-}
+} // namespace std

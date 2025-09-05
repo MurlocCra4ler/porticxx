@@ -8,8 +8,6 @@ namespace std {
 /* Classes */
 /***********/
 
-template<class T, class Allocator = allocator<T>>
-class deque
-{};
+template <class T, class Allocator = allocator<T>> class deque {};
 
-}
+} // namespace std

@@ -1,9 +1,8 @@
 #pragma once
 
+#include <bits/arch/arch.hpp>
 #include <cstddef>
 #include <cstdint>
-
-#include <bits/arch/arch.hpp>
 
 namespace std::impl_allocator {
 
@@ -13,8 +12,7 @@ struct memory_descriptor {
     void* ptr;
 };
 
-template<typename Arch = arch::current_arch>
-class bin_allocator {
+template <typename Arch = arch::current_arch> class bin_allocator {
 public:
     static bin_allocator& instance() {
         static bin_allocator allocater;
@@ -29,13 +27,14 @@ public:
 
         if (node->free_pages < 1) {
             return false;
-        }   
+        }
 
         while (true) {
             int left_idx = node_descriptor::get_left(idx);
             int right_idx = node_descriptor::get_right(idx);
 
-            if (left_idx >= NUM_NODES) break; 
+            if (left_idx >= NUM_NODES)
+                break;
 
             node_descriptor* left = &nodes[left_idx];
             node_descriptor* right = &nodes[right_idx];
@@ -61,7 +60,8 @@ public:
 
         result.idx = idx;
         result.size = node->free_pages * Arch::page_size();
-        result.ptr = &m_heap[offset_pages * Arch::page_size()];;
+        result.ptr = &m_heap[offset_pages * Arch::page_size()];
+        ;
 
         uint16_t pages_allocated = node->free_pages;
         node->free_pages = 0;
@@ -71,7 +71,7 @@ public:
             node = &nodes[idx];
             node->free_pages -= pages_allocated;
         }
-        
+
         return true;
     }
 
@@ -80,7 +80,8 @@ public:
             return false;
         }
 
-        int right_idx = node_descriptor::get_right(node_descriptor::get_parent(memory.idx));
+        int right_idx =
+            node_descriptor::get_right(node_descriptor::get_parent(memory.idx));
         if (right_idx == memory.idx) {
             return false;
         }
@@ -104,7 +105,7 @@ public:
 
         memory.idx = node_descriptor::get_parent(memory.idx);
         memory.size <<= 1;
-        
+
         return true;
     }
 
@@ -140,4 +141,4 @@ private:
     }
 };
 
-}
+} // namespace std::impl_allocator

@@ -1,31 +1,75 @@
 #pragma once
 
 #include <bits/ios/basic_ios.hpp>
+#include <bits/iterator/ostreambuf_iterator.hpp>
+#include <bits/locale/num_put.hpp>
 
 namespace std {
 
-/****************************/
-/* Class std::basic_ostream */
-/****************************/
-
-template<class CharT, class Traits = char_traits<CharT>>
+template <class CharT, class Traits = char_traits<CharT>>
 class basic_ostream : virtual public basic_ios<CharT, Traits> {
 public:
-    using char_type   = CharT;
+    using char_type = CharT;
+    using int_type = typename Traits::int_type;
+    using pos_type = typename Traits::pos_type;
+    using off_type = typename Traits::off_type;
+    using traits_type = Traits;
+
+    // prefix/suffix
+    class sentry {
+    public:
+        explicit sentry(basic_ostream& os) : os_(os), ok_(false) {
+            if (auto* tie = os.tie()) {
+                tie->flush();
+            }
+            ok_ = true;
+        }
+        ~sentry() {
+            if ((os_.flags() & ios_base::unitbuf) && !os_.bad()) {
+                if (!os_.flush().ok()) {
+                    os_.setstate(ios_base::badbit);
+                }
+            }
+        }
+        explicit operator bool() const { return ok_; }
+
+        sentry(const sentry&) = delete;
+        sentry& operator=(const sentry&) = delete;
+
+    private:
+        basic_ostream& os_;
+        bool ok_;
+    };
 
     // constructor/destructor
-    explicit basic_ostream(basic_streambuf<char_type, Traits>* sb);
+    explicit basic_ostream(basic_streambuf<char_type, Traits>* sb) {
+        this->init(sb);
+    }
     virtual ~basic_ostream();
 
     // formatted output
     basic_ostream& operator<<(basic_ostream& (*pf)(basic_ostream&));
-    basic_ostream& operator<<(basic_ios<CharT, Traits>& (*pf)(basic_ios<CharT, Traits>&));
+    basic_ostream&
+    operator<<(basic_ios<CharT, Traits>& (*pf)(basic_ios<CharT, Traits>&));
     basic_ostream& operator<<(ios_base& (*pf)(ios_base&));
- 
+
     basic_ostream& operator<<(bool n);
     basic_ostream& operator<<(short n);
     basic_ostream& operator<<(unsigned short n);
-    basic_ostream& operator<<(int n);
+    basic_ostream& operator<<(int n) {
+        using numput_type = num_put<CharT, ostreambuf_iterator<CharT, Traits>>;
+
+        sentry sentry(*this);
+
+        const numput_type& np = use_facet<numput_type>(this->getloc());
+        ostreambuf_iterator<CharT, Traits> it(*this);
+
+        if (np.put(it, *this, this->fill(), static_cast<long>(n)).failed()) {
+            this->setstate(std::ios_base::badbit);
+        }
+
+        return *this;
+    }
     basic_ostream& operator<<(unsigned int n);
     basic_ostream& operator<<(long n);
     basic_ostream& operator<<(unsigned long n);
@@ -34,38 +78,40 @@ public:
     basic_ostream& operator<<(float f);
     basic_ostream& operator<<(double f);
     basic_ostream& operator<<(long double f);
- 
+
     basic_ostream& operator<<(const void* p);
     basic_ostream& operator<<(const volatile void* p);
     basic_ostream& operator<<(nullptr_t);
     basic_ostream& operator<<(basic_streambuf<char_type, Traits>* sb);
- 
+
     // unformatted output
     result_ref<basic_ostream> put(char_type c);
     result_ref<basic_ostream> write(const char_type* s, streamsize n);
- 
+
     result_ref<basic_ostream> flush();
 };
 
 // unformatted output
-template<class CharT, class Traits>
-result_ref<std::basic_ostream<CharT, Traits>> basic_ostream<CharT, Traits>::put(char_type c) {
+template <class CharT, class Traits>
+result_ref<basic_ostream<CharT, Traits>>
+basic_ostream<CharT, Traits>::put(char_type c) {
     if (this->rdbuf()->sputc(c) == Traits::eof()) {
-        return this->setstate(std::ios_base::badbit).map_to_ref(*this);
+        return this->setstate(ios_base::badbit).map_to_ref(*this);
     }
     return *this;
 }
 
-template<class CharT, class Traits>
-result_ref<std::basic_ostream<CharT, Traits>> basic_ostream<CharT, Traits>::flush() {
+template <class CharT, class Traits>
+result_ref<basic_ostream<CharT, Traits>> basic_ostream<CharT, Traits>::flush() {
     if (this->rdbuf()->pubsync() == -1) {
         return this->setstate(ios_base::badbit).map_to_ref(*this);
     }
     return *this;
 }
 
-template<class Traits>
-std::basic_ostream<char, Traits>& operator<<(std::basic_ostream<char, Traits>& os, const char* s) {
+template <class Traits>
+basic_ostream<char, Traits>& operator<<(basic_ostream<char, Traits>& os,
+                                        const char* s) {
     if (!s) {
         return os << "(null)";
     }
@@ -73,4 +119,4 @@ std::basic_ostream<char, Traits>& operator<<(std::basic_ostream<char, Traits>& o
     return os.write(s, Traits::length(s));
 }
 
-}
+} // namespace std

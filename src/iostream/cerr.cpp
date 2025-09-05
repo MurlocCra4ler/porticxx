@@ -9,7 +9,7 @@ protected:
     int sync() override {
         ptrdiff_t n = pptr() - pbase();
         if (n > 0) {
-            if (arch::current_arch::stdout_write(pbase(), n) !=
+            if (arch::current_arch::stderr_write(pbase(), n) !=
                 static_cast<size_t>(n)) {
                 return -1;
             }
@@ -29,7 +29,7 @@ protected:
     }
 };
 
-static cerr_streambuf cout_sb;
-ostream cout(&cout_sb);
+static cerr_streambuf cerr_sb;
+ostream cerr(&cerr_sb);
 
 } // namespace std

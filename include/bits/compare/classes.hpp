@@ -10,4 +10,4 @@ class partial_ordering;
 class weak_ordering;
 class strong_ordering;
 
-}
+} // namespace std

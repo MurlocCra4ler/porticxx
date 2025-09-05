@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstddef>
 #include <bits/exception/exception_ptr.hpp>
+#include <cstddef>
 
 namespace std::arch {
 
@@ -23,7 +23,7 @@ struct default_arch {
     static void* memcpy(void* dst, const void* src, std::size_t n);
     static void* memset(void* dst, int value, std::size_t n);
 
-    // threads 
+    // threads
     static void thread_yield() { /* noop */ }
 
     // sync
@@ -31,13 +31,15 @@ struct default_arch {
     static void atomic_store(int& ref, int val);
     static int atomic_exchange(int& ref, int val);
     static bool atomic_compare_exchange(int& ref, int& expected, int desired);
-    static int  atomic_fetch_add(int& ref, int val);
+    static int atomic_fetch_add(int& ref, int val);
 
     // runtime
     [[noreturn]] static void exit(int exit_code);
+    [[noreturn]] static void abort();
 
     // excptions
-    [[noreturn]] static void terminate_on_exception(std::exception_ptr exception);
+    [[noreturn]] static void
+    terminate_on_exception(std::exception_ptr exception);
 };
 
-}
+} // namespace std::arch

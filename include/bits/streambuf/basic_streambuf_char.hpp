@@ -4,16 +4,15 @@
 
 namespace std {
 
-template<>
-class basic_streambuf<char, char_traits<char>> {
+template <> class basic_streambuf<char, char_traits<char>> {
 public:
-    using char_type   = char;
-    using int_type    = typename char_traits<char>::int_type;
-    using pos_type    = typename char_traits<char>::pos_type;
-    using off_type    = typename char_traits<char>::off_type;
+    using char_type = char;
+    using int_type = typename char_traits<char>::int_type;
+    using pos_type = typename char_traits<char>::pos_type;
+    using off_type = typename char_traits<char>::off_type;
     using traits_type = char_traits<char>;
- 
-    basic_streambuf() { 
+
+    basic_streambuf() {
         // Get-Area
         m_eback = m_gbuffer;
         m_gptr = m_gbuffer;
@@ -35,13 +34,14 @@ public:
     streamsize in_avail();
     int_type snextc() {
         return traits_type::eq_int_type(sbumpc(), traits_type::eof())
-            ? traits_type::eof()
-            : sgetc();
+                   ? traits_type::eof()
+                   : sgetc();
     }
-    
+
     int_type sbumpc() {
         if (gptr() < egptr()) {
-            typename char_traits<char>::int_type c = char_traits<char>::to_int_type(*gptr());
+            typename char_traits<char>::int_type c =
+                char_traits<char>::to_int_type(*gptr());
             gbump(1);
             return c;
         }
@@ -49,7 +49,10 @@ public:
         return uflow();
     }
 
-    int_type sgetc() { return gptr() < egptr() ? traits_type::to_int_type(*gptr()) : underflow(); }
+    int_type sgetc() {
+        return gptr() < egptr() ? traits_type::to_int_type(*gptr())
+                                : underflow();
+    }
     streamsize sgetn(char_type* s, streamsize n);
 
     // put area
@@ -71,10 +74,10 @@ protected:
 
     // get area access
     char_type* eback() const { return m_eback; }
-    char_type* gptr()  const { return m_gptr; }
+    char_type* gptr() const { return m_gptr; }
     char_type* egptr() const { return m_egptr; }
     void gbump(int n) { m_gptr += n; }
-    void setg(char_type* gbeg, char_type* gnext, char_type* gend) { 
+    void setg(char_type* gbeg, char_type* gnext, char_type* gend) {
         m_eback = gbeg;
         m_gptr = gnext;
         m_egptr = gend;
@@ -93,7 +96,8 @@ protected:
     virtual int_type underflow() { return traits_type::eof(); }
     virtual int_type uflow() {
         int_type c = underflow();
-        if (!traits_type::eq_int_type(c, traits_type::eof())) gbump(1);
+        if (!traits_type::eq_int_type(c, traits_type::eof()))
+            gbump(1);
         return c;
     }
 
@@ -115,4 +119,4 @@ private:
     char* m_epptr;
 };
 
-}
+} // namespace std

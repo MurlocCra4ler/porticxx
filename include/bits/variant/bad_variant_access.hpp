@@ -10,4 +10,4 @@ public:
     const char* what() const noexcept override;
 };
 
-}
+} // namespace std

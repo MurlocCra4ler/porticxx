@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <utility>
 
+#include <bits/functional/equal_to.hpp>
+
 namespace std {
 
 template<class> class function;

@@ -4,8 +4,7 @@
 
 namespace std::impl_allocator {
 
-template<typename T, typename Arch = arch::current_arch>
-class obj_allocator {
+template <typename T, typename Arch = arch::current_arch> class obj_allocator {
 public:
     static obj_allocator<T>& instance() {
         static obj_allocator<T> allocator;
@@ -24,12 +23,14 @@ public:
         while (true) {
             size_t old_capacity = m_obj_memory.size / sizeof(T);
 
-            auto& bin_allocator = ::std::impl_allocator::bin_allocator<Arch>::instance();
+            auto& bin_allocator =
+                ::std::impl_allocator::bin_allocator<Arch>::instance();
             bin_allocator.grow(m_obj_memory);
 
             size_t new_capacity = m_obj_memory.size / sizeof(T);
             int new_seg_idx = alloc_segment();
-            m_segments[new_seg_idx] = { old_capacity, new_capacity - old_capacity, -1 };
+            m_segments[new_seg_idx] = {old_capacity,
+                                       new_capacity - old_capacity, -1};
             insert_segment(new_seg_idx, m_segments[new_seg_idx]);
 
             T* ptr;
@@ -45,11 +46,12 @@ public:
 
         int new_seg_idx = alloc_segment();
         segment_t& new_seg = m_segments[new_seg_idx];
-        new_seg = { start, n, -1 };
+        new_seg = {start, n, -1};
 
         insert_segment(new_seg_idx, new_seg);
         merge_segments();
     }
+
 private:
     static constexpr size_t MAX_SEGMENTS = Arch::max_segments();
 
@@ -77,7 +79,7 @@ private:
         bin_allocator.allocate(m_obj_memory);
 
         m_base = reinterpret_cast<T*>(m_obj_memory.ptr);
-        m_segments[0] = { 0, m_obj_memory.size / sizeof(T), -1 };
+        m_segments[0] = {0, m_obj_memory.size / sizeof(T), -1};
     }
 
     int alloc_segment() {
@@ -88,13 +90,12 @@ private:
         return m_num_used++;
     }
 
-    void free_segment(int idx) {
-        m_free_stack[++m_free_stack_top] = idx;
-    }
+    void free_segment(int idx) { m_free_stack[++m_free_stack_top] = idx; }
 
     bool allocate_from_segment(int idx, size_t n, T*& out_ptr) {
         segment_t& seg = m_segments[idx];
-        if (seg.length < n) return false;
+        if (seg.length < n)
+            return false;
 
         size_t start = seg.start;
         seg.start += n;
@@ -107,8 +108,10 @@ private:
                 curr = m_segments[curr].next;
             }
             if (curr != -1) {
-                if (prev == -1) m_free_list_head = seg.next;
-                else m_segments[prev].next = seg.next;
+                if (prev == -1)
+                    m_free_list_head = seg.next;
+                else
+                    m_segments[prev].next = seg.next;
                 free_segment(idx);
             }
         }
@@ -118,7 +121,8 @@ private:
     }
 
     void insert_segment(int idx, segment_t& seg) {
-        if (m_free_list_head == -1 || seg.start < m_segments[m_free_list_head].start) {
+        if (m_free_list_head == -1 ||
+            seg.start < m_segments[m_free_list_head].start) {
             seg.next = m_free_list_head;
             m_free_list_head = idx;
         } else {
@@ -151,4 +155,4 @@ private:
     }
 };
 
-}
+} // namespace std::impl_allocator

@@ -12,4 +12,4 @@ using current_arch = arch_base<x86_64_arch>;
 using current_arch = arch_base<default_arch>;
 #endif
 
-}
+} // namespace std::arch

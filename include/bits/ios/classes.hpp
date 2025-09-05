@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstddef>
 #include <bits/ios/fwd.hpp>
+#include <cstddef>
 
 namespace std {
 
@@ -9,10 +9,10 @@ namespace std {
 /* Classes */
 /***********/
 
-using streamoff  = std::ptrdiff_t;
+using streamoff = std::ptrdiff_t;
 using streamsize = std::size_t;
 
-template<class StateT> class fpos {
+template <class StateT> class fpos {
 public:
     StateT state() const;
 
@@ -24,4 +24,4 @@ private:
 
 using streampos = fpos<mbstate_t>;
 
-}
+} // namespace std

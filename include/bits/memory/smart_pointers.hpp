@@ -5,8 +5,7 @@
 
 namespace std {
 
-template<class T, class... Args>
-shared_ptr<T> make_shared(Args&&... args) {
+template <class T, class... Args> shared_ptr<T> make_shared(Args&&... args) {
     using ctrl_t = impl_shared_ptr::ctrl_block_inplace<T>;
     auto* ctrl = new ctrl_t(std::forward<Args>(args)...);
     shared_ptr<T> sp;
@@ -15,4 +14,4 @@ shared_ptr<T> make_shared(Args&&... args) {
     return sp;
 }
 
-}
+} // namespace std

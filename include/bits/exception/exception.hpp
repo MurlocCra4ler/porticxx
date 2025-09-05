@@ -7,4 +7,4 @@ public:
     virtual const char* what() const noexcept;
 };
 
-}
+} // namespace std

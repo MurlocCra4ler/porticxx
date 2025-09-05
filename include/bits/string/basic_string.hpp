@@ -1,49 +1,51 @@
 
 #pragma once
 
+#include <bits/iterator/adaptor_classes.hpp>
 #include <bits/memory/allocators.hpp>
 #include <bits/string/char_traits.hpp>
-#include <bits/iterator/adaptor_classes.hpp>
 #include <bits/string_view/basic_string_view.hpp>
 
 namespace std {
 
-template<
-    class CharT,
-    class Traits = char_traits<CharT>,
-    class Allocator = allocator<CharT>
->
+template <class CharT, class Traits = char_traits<CharT>,
+          class Allocator = allocator<CharT>>
 class basic_string {
 public:
-    using traits_type            = Traits;
-    using value_type             = CharT;
-    using allocator_type         = Allocator;
-    using size_type              = typename allocator_traits<Allocator>::size_type;
-    using difference_type        = typename allocator_traits<Allocator>::difference_type;
-    using pointer                = typename allocator_traits<Allocator>::pointer;
-    using const_pointer          = typename allocator_traits<Allocator>::const_pointer;
-    using reference              = value_type&;
-    using const_reference        = const value_type&;
- 
-    using iterator               = CharT*;
-    using const_iterator         = const CharT*;
-    using reverse_iterator       = std::reverse_iterator<iterator>;
+    using traits_type = Traits;
+    using value_type = CharT;
+    using allocator_type = Allocator;
+    using size_type = typename allocator_traits<Allocator>::size_type;
+    using difference_type =
+        typename allocator_traits<Allocator>::difference_type;
+    using pointer = typename allocator_traits<Allocator>::pointer;
+    using const_pointer = typename allocator_traits<Allocator>::const_pointer;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+
+    using iterator = CharT*;
+    using const_iterator = const CharT*;
+    using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    constexpr basic_string() noexcept(noexcept(Allocator())) : basic_string(Allocator()) {}
+    constexpr basic_string() noexcept(noexcept(Allocator()))
+        : basic_string(Allocator()) {}
     constexpr explicit basic_string(const Allocator& a)
-        : m_allocator(a), m_size(0), m_capacity(sizeof(m_inplace) - 1), m_using_inplace(true) {
+        : m_allocator(a), m_size(0), m_capacity(sizeof(m_inplace) - 1),
+          m_using_inplace(true) {
         m_inplace[0] = Traits::to_char_type(0);
     }
-    
+
     constexpr basic_string(const CharT* s, const Allocator& a = Allocator());
-    //constexpr basic_string(const CharT* s, size_type count, const Allocator& alloc = Allocator());
-    constexpr basic_string(size_type n, CharT c, const Allocator& a = Allocator());
+    // constexpr basic_string(const CharT* s, size_type count, const Allocator&
+    // alloc = Allocator());
+    constexpr basic_string(size_type n, CharT c,
+                           const Allocator& a = Allocator());
 
     // iterators
-    constexpr iterator       begin() noexcept;
+    constexpr iterator begin() noexcept;
     constexpr const_iterator begin() const noexcept;
-    constexpr iterator       end() noexcept;
+    constexpr iterator end() noexcept;
     constexpr const_iterator end() const noexcept;
 
     // capacity
@@ -52,10 +54,11 @@ public:
     constexpr size_type max_size() const noexcept;
     constexpr void resize(size_type n, CharT c);
     constexpr void resize(size_type n);
-    template<class Operation> constexpr void resize_and_overwrite(size_type n, Operation op);
+    template <class Operation>
+    constexpr void resize_and_overwrite(size_type n, Operation op);
     constexpr size_type capacity() const noexcept;
     constexpr void reserve(size_type res_arg);
-    
+
     constexpr void shrink_to_fit() {
         if (m_using_inplace) {
             return;
@@ -63,7 +66,7 @@ public:
 
         if (m_size < INPLACE_SIZE) {
             __builtin_memcpy(m_inplace, m_data, m_size + 1);
-            
+
             m_allocator.deallocate(m_data, m_capacity + 1);
             m_using_inplace = true;
             m_capacity = INPLACE_SIZE - 1;
@@ -78,8 +81,10 @@ public:
     }
 
     constexpr void clear() noexcept {
-        if (m_using_inplace) m_inplace[0] = Traits::to_char_type(0);
-        else m_data[0] = Traits::to_char_type(0);
+        if (m_using_inplace)
+            m_inplace[0] = Traits::to_char_type(0);
+        else
+            m_data[0] = Traits::to_char_type(0);
         m_size = 0;
         shrink_to_fit();
     }
@@ -108,20 +113,24 @@ public:
 
     // string operations
     constexpr const CharT* c_str() const noexcept;
-    constexpr const CharT* data() const noexcept { return m_using_inplace ? m_inplace : m_data; }
-    constexpr CharT* data() noexcept { return m_using_inplace ? m_inplace : m_data; }
+    constexpr const CharT* data() const noexcept {
+        return m_using_inplace ? m_inplace : m_data;
+    }
+    constexpr CharT* data() noexcept {
+        return m_using_inplace ? m_inplace : m_data;
+    }
     constexpr operator basic_string_view<CharT, Traits>() const noexcept {
         return std::basic_string_view<CharT, Traits>(data(), size());
     }
 
 private:
-    static constexpr size_t INPLACE_SIZE = 1 << 6; 
+    static constexpr size_t INPLACE_SIZE = 1 << 6;
 
     Allocator m_allocator;
 
     union {
         CharT* m_data;
-        CharT  m_inplace[4];
+        CharT m_inplace[4];
     };
 
     size_t m_size;
@@ -145,10 +154,10 @@ private:
     }
 };
 
-using string    = basic_string<char>;
-using u8string  = basic_string<char8_t>;
+using string = basic_string<char>;
+using u8string = basic_string<char8_t>;
 using u16string = basic_string<char16_t>;
 using u32string = basic_string<char32_t>;
-using wstring   = basic_string<wchar_t>;
+using wstring = basic_string<wchar_t>;
 
-}
+} // namespace std
