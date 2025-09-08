@@ -23,6 +23,11 @@ struct default_arch {
     static void* memcpy(void* dst, const void* src, std::size_t n);
     static void* memset(void* dst, int value, std::size_t n);
 
+    // fs
+    static constexpr std::size_t MAX_PATH_LEN = 0;
+
+    static void fs_get_current(char* buffer);
+
     // threads
     static void thread_yield() { /* noop */ }
 

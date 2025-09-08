@@ -43,6 +43,15 @@ template <typename Derived> struct arch_base {
         return Derived::stdin_read(buffer, count);
     }
 
+    // fs
+    static constexpr std::size_t max_path_len() {
+        return Derived::MAX_PATH_LEN;
+    }
+
+    static void fs_get_current(char* buffer) {
+        return Derived::fs_get_current(buffer);
+    };
+
     // threads
     using thread_handle_type = Derived::thread_handle_type;
 

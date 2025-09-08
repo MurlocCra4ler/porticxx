@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sys/syscall.h>
+
 static inline long sys_call6(long n, long a1, long a2, long a3, long a4,
                              long a5, long a6) {
     unsigned long ret;

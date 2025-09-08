@@ -6,7 +6,7 @@
 
 namespace std::arch {
 
-#ifdef ARCH_X86_64
+#ifdef PCXX_ARCH_X86_64
 using current_arch = arch_base<x86_64_arch>;
 #else
 using current_arch = arch_base<default_arch>;

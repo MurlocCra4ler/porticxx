@@ -272,9 +272,6 @@ private:
 
     void free_element(node_type* el) {
         // remove from bucket
-        size_type bucket_idx = hasher{}(el->value->first) % num_buckets_;
-        node_type* bucket = &buckets_[bucket_idx];
-
         node_type* prev = el->prev;
         node_type* next = el->next;
         if (prev)

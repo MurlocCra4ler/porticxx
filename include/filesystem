@@ -1,0 +1,20 @@
+#pragma once
+
+#include <system_error>
+#include <bits/filesystem/path.hpp>
+#include <bits/arch/arch.hpp>
+
+namespace std::filesystem {
+
+path current_path() {
+    constexpr size_t PATH_LEN = arch::current_arch::max_path_len();
+    char buffer[PATH_LEN];
+
+    arch::current_arch::fs_get_current(buffer);
+    return buffer;
+}
+path current_path(error_code& ec);
+void current_path(const path& p);
+void current_path(const path& p, error_code& ec) noexcept;
+
+}

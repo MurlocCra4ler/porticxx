@@ -79,6 +79,11 @@ void* default_arch::memset(void* dst, int value, std::size_t n) {
     return dst;
 }
 
+void default_arch::fs_get_current(char*) {
+    bad_arch_function e;
+    make_exception_ptr(e).abort();
+}
+
 int default_arch::atomic_load(int& ref) {
     int expected = ref;
     current_arch::atomic_compare_exchange(ref, expected, expected);
@@ -124,7 +129,8 @@ int default_arch::atomic_fetch_add(int& ref, int val) {
 default_arch::terminate_on_exception(std::exception_ptr exception) {
     const char* msg = exception->what();
     std::size_t count = std::strlen(msg);
-    stderr_write(msg, count);
+    arch::current_arch::stderr_write(msg, count);
+    arch::current_arch::stderr_write("\n", 1);
     exit(-1);
 }
 

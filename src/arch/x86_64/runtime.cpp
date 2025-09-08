@@ -7,15 +7,21 @@ extern "C" void* __dso_handle = nullptr;
 extern "C" void (*__init_array_start[])();
 extern "C" void (*__init_array_end[])();
 
-extern int main();
+extern "C" int main(int, char**, char**);
 
-extern "C" void _start() {
-    // C++-Konstruktoren aufrufen
+extern "C" void runtime_start(void* stack) {
+    long* sp = (long*)stack;
+
+    int argc = (int)sp[0];
+    char** argv = (char**)&sp[1];
+    char** envp = argv + argc + 1;
+
     for (auto ctor = __init_array_start; ctor < __init_array_end; ++ctor) {
         (*ctor)();
     }
 
-    int ret = main();
+    int ret = main(argc, argv, envp);
+
     std::arch::x86_64_arch::exit(ret);
 }
 

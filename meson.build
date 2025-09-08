@@ -2,7 +2,7 @@ project('porticxx', 'cpp')
 
 arch_name = meson.get_external_property('arch', 'unknown')
 arch_sources = files('src/arch/default_arch.cpp')
-arch_define = 'ARCH_UNKNOWN'
+arch_cpp_args = []
 
 if arch_name == 'wasm32-stubs'
     arch_sources += files(
@@ -14,11 +14,13 @@ if arch_name == 'wasm32-stubs'
 elif arch_name == 'x86_64'
     arch_sources += files(
         'src/arch/x86_64/runtime.cpp',
+        'src/arch/x86_64/runtime.s',
         'src/arch/x86_64/io.cpp',
+        'src/arch/x86_64/fs.cpp',
         'src/arch/x86_64/thread.cpp',
         'src/arch/x86_64/sys_call.s',
     )
-    arch_define = 'ARCH_X86_64'
+    arch_cpp_args = ['-DPCXX_ARCH_X86_64']
 else
     error('Unknown architecture: ' + arch_name)
 endif
@@ -49,7 +51,7 @@ porticxx_lib = static_library(
     'porticxx',
     sources: [arch_sources, sources],
     include_directories: ['include', 'src/include'],
-    cpp_args: ['-D' + arch_define])
+    cpp_args: arch_cpp_args)
 
 porticxx_dep = declare_dependency(
     include_directories: 'include', 

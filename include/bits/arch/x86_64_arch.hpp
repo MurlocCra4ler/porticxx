@@ -15,6 +15,13 @@ struct x86_64_arch : public default_arch {
     static ptrdiff_t stderr_write(const void* data, size_t count);
     static ptrdiff_t stdin_read(void* buffer, size_t count);
 
+    // fs
+    static constexpr std::size_t MAX_PATH_LEN = 4096;
+
+    static void fs_readlink(const char* path, char* buffer, size_t size);
+
+    static void fs_get_current(char* buffer);
+
     // threads
     using thread_handle_type = struct {
         int tid;

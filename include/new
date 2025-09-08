@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstddef>
+//#include <bits/memory/allocators.hpp>
 
 void* operator new(std::size_t size);
 
-constexpr void* operator new (std::size_t count, void* ptr);
+[[nodiscard]] inline constexpr void* operator new (std::size_t count, void* ptr) { return ptr; }

@@ -2,6 +2,7 @@
 
 #include <bits/memory/unique_pointer.hpp>
 #include <bits/type_traits/type_transformations.hpp>
+#include <bits/utility/functions.hpp>
 #include <cstddef>
 
 namespace std {
@@ -39,7 +40,7 @@ template <typename T> struct ctrl_block_inplace : ctrl_block_base {
     alignas(T) unsigned char storage[sizeof(T)];
 
     template <typename... Args> ctrl_block_inplace(Args&&... args) {
-        new (storage) T(forward<Args>(args)...);
+        new (storage) T(std::forward<Args>(args)...);
     }
 
     T* get_ptr() noexcept { return reinterpret_cast<T*>(storage); }
