@@ -2,7 +2,9 @@
 
 #include <bits/functional/equal_to.hpp>
 #include <bits/memory/allocators.hpp>
+#include <bits/utility/tags.hpp>
 #include <iterator>
+#include <tuple>
 
 namespace std {
 
@@ -13,11 +15,9 @@ namespace _impl_unordered_map {
 template <typename Key, typename T> struct node {
     using value_type = pair<const Key, T>;
 
-    value_type value;
+    value_type* value;
     node* next = nullptr;
-
-    template <class... Args>
-    node(Args&&... args) : value(std::forward<Args>(args)...) {}
+    node* prev = nullptr;
 };
 
 template <typename Node> class node_iterator {
@@ -28,21 +28,34 @@ public:
     using pointer = value_type*;
     using reference = value_type&;
 
-    reference operator*() const { return curr->value; }
-    pointer operator->() const { return &curr->value; }
+    node_iterator(Node* n) : cur_(n) {}
+
+    reference operator*() const { return *cur_->value; }
+    pointer operator->() const { return cur_->value; }
 
     friend bool operator==(const node_iterator& a, const node_iterator& b) {
-        return a.curr == b.curr;
+        return a.cur_ == b.cur_;
     }
 
     friend bool operator!=(const node_iterator& a, const node_iterator& b) {
         return !(a == b);
     }
 
-private:
-    using node_type = Node;
+    node_iterator& operator++() {
+        if (cur_) {
+            cur_ = cur_->next;
+        }
+        return *this;
+    }
 
-    node_type* curr;
+    node_iterator operator++(int) {
+        node_iterator tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+private:
+    Node* cur_;
 };
 
 } // namespace _impl_unordered_map
@@ -76,7 +89,7 @@ public:
     // iterators
     iterator begin() noexcept;
     const_iterator begin() const noexcept;
-    iterator end() noexcept;
+    iterator end() noexcept { return iterator(nullptr); }
     const_iterator end() const noexcept;
     const_iterator cbegin() const noexcept;
     const_iterator cend() const noexcept;
@@ -86,10 +99,76 @@ public:
     size_type size() const noexcept { return size_; }
     size_type max_size() const noexcept;
 
+    iterator erase(iterator pos) {
+        if (pos == end())
+            return pos;
+
+        node_type* el = pos.cur_;
+        free_element(el);
+    }
+    iterator erase(const_iterator pos);
+    size_type erase(const key_type& key);
+    template <class K> size_type erase(K&& x) {
+        size_type count = 0;
+        size_type bucket_idx = hasher{}(x) % num_buckets_;
+
+        node_type* it = buckets_[bucket_idx].next;
+        while (it && it->value) {
+            node_type* next = it->next;
+            if (key_equal{}(it->value->first, x)) {
+                free_element(it);
+                count += 1;
+            }
+
+            it = next;
+        }
+
+        return count;
+    }
+    iterator erase(const_iterator first, const_iterator last);
+    /*void swap(unordered_map&) noexcept(
+      allocator_traits<Allocator>::is_always_equal::value&&
+      is_nothrow_swappable_v<Hash>&& is_nothrow_swappable_v<Pred>); */
+    void clear() noexcept;
+
     // map operations
-    iterator find(const key_type& k);
-    const_iterator find(const key_type& k) const;
-    template <class K> iterator find(const K& k);
+    iterator find(const key_type& k) {
+        size_type bucket_idx = hasher{}(k) % num_buckets_;
+
+        for (node_type* it = buckets_[bucket_idx].next; it != nullptr;
+             it = it->next) {
+            if (!it->value) {
+                // we reached the next bucket
+                return end();
+            }
+
+            if (key_equal{}(it->value->first, k)) {
+                return iterator(it);
+            }
+        }
+
+        return end();
+    }
+    const_iterator find(const key_type& k) const {}
+    template <class K> iterator find(const K& k) {
+        if (empty())
+            return end();
+        size_type bucket_idx = hasher{}(k) % num_buckets_;
+
+        for (node_type* it = buckets_[bucket_idx].next; it != nullptr;
+             it = it->next) {
+            if (!it->value) {
+                // we reached the next bucket
+                return end();
+            }
+
+            if (key_equal{}(it->value->first, k)) {
+                return iterator(it);
+            }
+        }
+
+        return end();
+    }
     template <class K> const_iterator find(const K& k) const;
     size_type count(const key_type& k) const;
     template <class K> size_type count(const K& k) const;
@@ -102,24 +181,182 @@ public:
     pair<const_iterator, const_iterator> equal_range(const K& k) const;
 
     // element access
-    mapped_type& operator[](const key_type& k);
-    mapped_type& operator[](key_type&& k);
-    template <class K> mapped_type& operator[](K&& k);
+    mapped_type& operator[](const key_type& k) {
+        iterator it = find(k);
+        if (it != end()) {
+            return it->value->second;
+        }
+
+        node_type* node = allocate_element();
+        ::new (static_cast<void*>(node->value)) value_type(k, mapped_type{});
+        return node->value->second;
+    }
+    mapped_type& operator[](key_type&& k) {
+        iterator it = find(k);
+        if (it != end()) {
+            return it->value->second;
+        }
+
+        node_type* node = allocate_element(k);
+        ::new (static_cast<void*>(node->value)) value_type(std::move(k), T{});
+        return node->value->second;
+    }
+    template <class K> mapped_type& operator[](K&& k) {
+        iterator it = find(k);
+        if (it != end()) {
+            return it->second;
+        }
+
+        node_type* node = allocate_element(k);
+        ::new (static_cast<void*>(node->value)) value_type(
+            piecewise_construct, forward_as_tuple(std::forward<K>(k)),
+            forward_as_tuple());
+        return node->value->second;
+    }
     mapped_type& at(const key_type& k);
     const mapped_type& at(const key_type& k) const;
     template <class K> mapped_type& at(const K& k);
     template <class K> const mapped_type& at(const K& k) const;
 
 private:
-    allocator_type allocator_;
+    using node_allocator_type =
+        typename allocator_traits<Allocator>::template rebind_alloc<node_type>;
 
-    size_type capacity_;
-    size_type size_;
+    allocator_type pair_allocator_;
+    node_allocator_type node_allocator_;
+
+    node_type* nodes_;
+
+    node_type* buckets_;
+    size_type num_buckets_;
+
     node_type* elements_;
+    size_type capacity_ = 0;
+    size_type size_ = 0;
+
     node_type* free_list_;
 
-    size_t num_buckets_;
-    node_type* buckets_;
+    float ml_ = 1.0;
+
+    node_type* allocate_element(const key_type& k) {
+        if (size_ >= capacity_) {
+            grow();
+        }
+
+        // find free element
+        node_type* el;
+        if (free_list_) {
+            el = free_list_;
+            free_list_ = free_list_->next;
+        } else {
+            el = &elements_[size_];
+        }
+
+        // find bucket
+        size_type bucket_idx = hasher{}(k) % num_buckets_;
+        node_type* bucket = &buckets_[bucket_idx];
+
+        // insert new element at front
+        el->prev = bucket;
+        el->next = bucket->next;
+        bucket->next = el;
+        if (el->next)
+            el->next->prev = el;
+
+        // allocate value
+        el->value = pair_allocator_.allocate(1);
+
+        size_ += 1;
+        return el;
+    }
+
+    void free_element(node_type* el) {
+        // remove from bucket
+        size_type bucket_idx = hasher{}(el->value->first) % num_buckets_;
+        node_type* bucket = &buckets_[bucket_idx];
+
+        node_type* prev = el->prev;
+        node_type* next = el->next;
+        if (prev)
+            prev->next = next;
+        if (next)
+            next->prev = prev;
+
+        // add to free list
+        el->next = free_list_;
+        free_list_ = el;
+
+        // deallocate value
+        pair_allocator_.deallocate(el->value, 1);
+        el->value = nullptr;
+        size_ -= 1;
+    }
+
+    template <class Fn> void for_each_element(Fn&& fn) {
+        if (empty())
+            return;
+        for (node_type* it = &buckets_[0]; it != nullptr; it = it->next) {
+            if (it->value) {
+                fn(*it);
+            }
+        }
+    }
+
+    void grow() {
+        size_type new_capacity = capacity_ > 0 ? capacity_ << 1 : 2;
+        size_type required_buckets = static_cast<size_type>(new_capacity / ml_);
+        if (required_buckets == 0)
+            required_buckets = 1;
+
+        node_type* new_nodes =
+            node_allocator_.allocate(new_capacity + required_buckets);
+        node_type* new_buckets = new_nodes;
+        node_type* new_elements = new_nodes + required_buckets;
+
+        // initialize buckets
+        new_buckets[0].value = nullptr;
+        new_buckets[0].prev = nullptr;
+        new_buckets[required_buckets - 1].next = nullptr;
+
+        for (size_type i = 1; i < required_buckets; ++i) {
+            new_buckets[i].value = nullptr;
+            new_buckets[i].prev = &new_buckets[i - 1];
+            new_buckets[i - 1].next = &new_buckets[i];
+        }
+
+        // rehash elements
+        size_type idx = 0;
+        for_each_element([&](const node_type& old_el) {
+            value_type* val = old_el.value;
+
+            node_type* new_el = &new_elements[idx++];
+            new_el->value = val;
+
+            // find bucket
+            size_type bucket_idx = hasher{}(val->first) % required_buckets;
+            node_type* bucket = &new_buckets[bucket_idx];
+
+            // insert new element at front
+            new_el->prev = bucket;
+            new_el->next = bucket->next;
+            bucket->next = new_el;
+            if (new_el->next)
+                new_el->next->prev = new_el;
+        });
+
+        // free old memory
+        if (capacity_ > 0) {
+            node_allocator_.deallocate(nodes_, num_buckets_ + capacity_);
+        }
+
+        // update members
+        nodes_ = new_nodes;
+        buckets_ = new_buckets;
+        elements_ = new_elements;
+        num_buckets_ = required_buckets;
+        capacity_ = new_capacity;
+        free_list_ = nullptr;
+    }
 };
 
 } // namespace std

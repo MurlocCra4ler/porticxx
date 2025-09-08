@@ -20,7 +20,6 @@ void test_unordered_map_basic() {
     assert(m["a"] == 42);
     assert(m.size() == 3);
 
-    /*
     auto it = m.find("b");
     assert(it != m.end());
     assert(it->first == "b");
@@ -34,6 +33,7 @@ void test_unordered_map_basic() {
     assert(m.find("b") == m.end());
     assert(m.size() == 2);
 
+    /*
     auto [insIt, inserted] = m.insert({"d", 99});
     assert(inserted);
     assert(insIt->first == "d");

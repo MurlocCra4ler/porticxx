@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bits/type_traits/helpers.hpp>
+#include <bits/type_traits/unary_type_traits.hpp>
 
 namespace std {
 
@@ -39,5 +40,32 @@ struct is_base_of
 
 template <class Base, class Derived>
 constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
+
+// is_convertible
+namespace _impl_type_relationships {
+template <class T>
+auto test_returnable(int) -> decltype(void(static_cast<T (*)()>(nullptr)),
+                                      std::true_type{});
+template <class> auto test_returnable(...) -> std::false_type;
+
+template <class From, class To>
+auto test_implicitly_convertible(int)
+    -> decltype(void(declval<void (&)(To)>()(declval<From>())),
+                std::true_type{});
+template <class, class>
+auto test_implicitly_convertible(...) -> std::false_type;
+} // namespace _impl_type_relationships
+
+template <class From, class To>
+struct is_convertible
+    : std::integral_constant<
+          bool,
+          (decltype(_impl_type_relationships::test_returnable<To>(0))::value &&
+           decltype(_impl_type_relationships::test_implicitly_convertible<
+                    From, To>(0))::value) ||
+              (is_void<From>::value && is_void<To>::value)> {};
+
+template <class From, class To>
+constexpr bool is_convertible_v = is_convertible<From, To>::value;
 
 } // namespace std

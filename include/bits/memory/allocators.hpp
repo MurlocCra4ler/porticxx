@@ -31,6 +31,10 @@ public:
     constexpr ~allocator() = default;
     constexpr allocator& operator=(const allocator&) = default;
 
+    template <typename U> struct rebind {
+        using other = allocator<U>;
+    };
+
     constexpr T* allocate(size_t n) {
         auto& impl = impl_allocator::obj_allocator<T>::instance();
         return impl.allocate(n);
@@ -111,6 +115,10 @@ public:
     using const_pointer = impl_allocators::const_pointer_type_t<Alloc>;
     // using void_pointer                           = /* see description */;
     // using const_void_pointer                     = /* see description */;
+
+    template <class T>
+    using rebind_alloc = typename Alloc::template rebind<T>::other;
+    template <class T> using rebind_traits = allocator_traits<rebind_alloc<T>>;
 
     using difference_type = impl_allocators::difference_type_t<Alloc>;
     using size_type = impl_allocators::size_type_t<Alloc>;
