@@ -34,20 +34,30 @@ template <typename Derived> struct arch_base {
     static std::ptrdiff_t stdout_write(const void* data, std::size_t count) {
         return Derived::stdout_write(data, count);
     }
-
     static std::ptrdiff_t stderr_write(const void* data, std::size_t count) {
         return Derived::stderr_write(data, count);
     }
-
     static std::ptrdiff_t stdin_read(void* buffer, std::size_t count) {
         return Derived::stdin_read(buffer, count);
     }
 
-    // fs
+    // filesystem
+    using dir_stream_type = Derived::dir_stream_type;
+    using dir_entry_type = Derived::dir_entry_type;
+
     static constexpr std::size_t max_path_len() {
         return Derived::MAX_PATH_LEN;
     }
 
+    static dir_stream_type fs_open_dir(const char* path) {
+        return Derived::fs_open_dir(path);
+    }
+    static void fs_close_dir(dir_stream_type stream) {
+        return Derived::fs_close_dir(stream);
+    }
+    static bool fs_read_dir(dir_stream_type stream, dir_entry_type& entry) {
+        return Derived::fs_read_dir(stream, entry);
+    }
     static void fs_get_current(char* buffer) {
         return Derived::fs_get_current(buffer);
     };

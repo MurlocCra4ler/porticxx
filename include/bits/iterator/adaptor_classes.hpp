@@ -58,4 +58,8 @@ protected:
     // ranges::iterator_t<Container> iter = ranges::iterator_t<Container>();
 };
 
+struct default_sentinel_t {};
+
+inline constexpr default_sentinel_t default_sentinel{};
+
 } // namespace std

@@ -15,11 +15,16 @@ struct x86_64_arch : public default_arch {
     static ptrdiff_t stderr_write(const void* data, size_t count);
     static ptrdiff_t stdin_read(void* buffer, size_t count);
 
-    // fs
+    // filesystem
+    using dir_stream_type = struct {};
+    using dir_entry_type = struct {};
+
     static constexpr std::size_t MAX_PATH_LEN = 4096;
 
+    static dir_stream_type fs_open_dir(const char* path);
+    static void fs_close_dir(dir_stream_type stream);
+    static bool fs_read_dir(dir_stream_type stream, dir_entry_type& entry);
     static void fs_readlink(const char* path, char* buffer, size_t size);
-
     static void fs_get_current(char* buffer);
 
     // threads
