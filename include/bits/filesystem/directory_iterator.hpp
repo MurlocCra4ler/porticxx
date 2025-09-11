@@ -18,22 +18,19 @@ public:
     // member functions
     directory_iterator() noexcept = default;
     explicit directory_iterator(const path& p) : path_(p) {
-        native_stream_ = std::arch::current_arch::fs_open_dir(p.c_str());
-        at_end_ = !std::arch::current_arch::fs_read_dir(native_stream_, native_entry_);
-        filesystem::path file(arch::current_arch::fs_get_name(native_entry_));
-        cur_ = path_ / file;
+        native_stream_ = std::arch::current_arch::fs_dir_open(p.c_str());
+        at_end_ = !std::arch::current_arch::fs_dir_read(native_stream_,
+                                                        native_entry_);
+        filesystem::path file(
+            arch::current_arch::fs_dir_entry_name(native_entry_));
+        cur_ = directory_entry(path_ / file);
     }
     // directory_iterator(const path& p, directory_options options);
     directory_iterator(const path& p, error_code& ec);
     // directory_iterator(const path& p, directory_options options,
     //                    error_code& ec);
-    directory_iterator(const directory_iterator& rhs)
-        : cur_(rhs.cur_), native_stream_(rhs.native_stream_) {}
-    directory_iterator(directory_iterator&& rhs) noexcept
-        : cur_(std::move(rhs.cur_)),
-          native_stream_(std::move(rhs.native_stream_)), at_end_(rhs.at_end_) {
-        rhs.at_end_ = true;
-    }
+    directory_iterator(const directory_iterator& rhs) = default;
+    directory_iterator(directory_iterator&& rhs) = default;
     ~directory_iterator() = default;
 
     directory_iterator& operator=(const directory_iterator& rhs);
@@ -42,8 +39,9 @@ public:
     const directory_entry& operator*() const { return cur_; }
     const directory_entry* operator->() const { return &cur_; }
     directory_iterator& operator++() {
-        if (arch::current_arch::fs_read_dir(native_stream_,
-                                            cur_.native_entry_)) {
+        if (arch::current_arch::fs_dir_read(native_stream_, native_entry_)) {
+            cur_ = directory_entry(
+                path_ / arch::current_arch::fs_dir_entry_name(native_entry_));
             at_end_ = false;
         } else {
             at_end_ = true;
@@ -53,8 +51,10 @@ public:
     directory_iterator& increment(error_code& ec);
 
     bool operator==(const directory_iterator& rhs) const noexcept {
-        if (at_end_ && rhs.at_end_) return true;
-        if (at_end_ != rhs.at_end_) return false;
+        if (at_end_ && rhs.at_end_)
+            return true;
+        if (at_end_ != rhs.at_end_)
+            return false;
         return cur_ == rhs.cur_;
     }
 
@@ -63,7 +63,7 @@ private:
     directory_entry cur_;
     arch::current_arch::dir_stream_type native_stream_;
     arch::current_arch::dir_entry_type native_entry_;
-    bool at_end_ = false;
+    bool at_end_ = true;
 };
 
 inline directory_iterator begin(directory_iterator iter) noexcept {

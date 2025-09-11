@@ -49,21 +49,37 @@ template <typename Derived> struct arch_base {
         return Derived::MAX_PATH_LEN;
     }
 
-    static dir_stream_type fs_open_dir(const char* path) {
-        return Derived::fs_open_dir(path);
+    static dir_stream_type fs_dir_open(const char* path) {
+        return Derived::fs_dir_open(path);
     }
-    static void fs_close_dir(dir_stream_type stream) {
-        return Derived::fs_close_dir(stream);
+    static void fs_dir_close(dir_stream_type& stream) {
+        Derived::fs_dir_close(stream);
     }
-    static bool fs_read_dir(dir_stream_type stream, dir_entry_type& entry) {
-        return Derived::fs_read_dir(stream, entry);
+    static bool fs_dir_read(dir_stream_type& stream, dir_entry_type& entry) {
+        return Derived::fs_dir_read(stream, entry);
     }
-    static const char* fs_get_name(dir_entry_type& entry) {
-        return Derived::fs_get_name(entry);
+    static void fs_dir_get_current(char* buffer) {
+        Derived::fs_dir_get_current(buffer);
     }
-    static void fs_get_current(char* buffer) {
-        return Derived::fs_get_current(buffer);
-    };
+    static const char* fs_dir_entry_name(dir_entry_type& entry) {
+        return Derived::fs_dir_entry_name(entry);
+    }
+
+    static bool fs_path_is_absolute(const char* p) {
+        return Derived::fs_path_is_absolute(p);
+    }
+    static bool fs_path_root_dir(const char* p, const char** rd, size_t* len) {
+        return Derived::fs_path_root_dir(p, rd, len);
+    }
+    static bool fs_path_root_name(const char* p, const char** rn, size_t* len) {
+        return Derived::fs_path_root_name(p, rn, len);
+    }
+    static bool fs_path_filename(const char* p, const char** f, size_t* len) {
+        return Derived::fs_path_filename(p, f, len);
+    }
+    static void fs_path_readlink(const char* path, char* buffer, size_t size) {
+        return Derived::fs_path_readlink(path, buffer, size);
+    }
 
     // threads
     using thread_handle_type = Derived::thread_handle_type;

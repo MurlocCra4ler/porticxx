@@ -16,8 +16,8 @@ public:
     ~directory_entry() = default;
 
     // assignments
-    // directory_entry& operator=(const directory_entry&) = default;
-    // directory_entry& operator=(directory_entry&&) noexcept = default;
+    directory_entry& operator=(const directory_entry&) = default;
+    directory_entry& operator=(directory_entry&&) noexcept = default;
 
     // modifiers
     void assign(const filesystem::path& p);
@@ -59,7 +59,9 @@ public:
     // file_status symlink_status() const;
     // file_status symlink_status(error_code& ec) const noexcept;
 
-    bool operator==(const directory_entry& rhs) const noexcept { return path_ == rhs.path_; }
+    bool operator==(const directory_entry& rhs) const noexcept {
+        return path_ == rhs.path_;
+    }
     strong_ordering operator<=>(const directory_entry& rhs) const noexcept;
 
     // inserter
@@ -69,11 +71,6 @@ public:
 
 private:
     filesystem::path path_;
-    arch::current_arch::dir_entry_type native_entry_;
-
-    directory_entry(const filesystem::path& p,
-                    arch::current_arch::dir_entry_type entry)
-        : path_(p), native_entry_(entry) {}
 
     friend class directory_iterator; // exposition only
 };

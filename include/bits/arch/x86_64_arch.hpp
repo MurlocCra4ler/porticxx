@@ -2,6 +2,7 @@
 
 #include <bits/arch/default_arch.hpp>
 #include <cstddef>
+#include <cstdint>
 
 namespace std::arch {
 
@@ -19,19 +20,29 @@ struct x86_64_arch : public default_arch {
     static constexpr std::size_t MAX_PATH_LEN = 4096;
     static constexpr std::size_t MAX_FILENAME_LEN = 256;
 
-    using dir_stream_type = int;
+    using dir_stream_type = struct {
+        int fd;
+        int pos;
+        long len;
+        uint8_t buffer[4096];
+    };
     using dir_entry_type = struct {
         unsigned long inode;
         char name[MAX_FILENAME_LEN];
         char type;
     };
 
-    static dir_stream_type fs_open_dir(const char* path);
-    static void fs_close_dir(dir_stream_type stream);
-    static bool fs_read_dir(dir_stream_type stream, dir_entry_type& entry);
-    static const char* fs_get_name(dir_entry_type& entry);
-    static void fs_readlink(const char* path, char* buffer, size_t size);
-    static void fs_get_current(char* buffer);
+    static dir_stream_type fs_dir_open(const char* path);
+    static void fs_dir_close(dir_stream_type& stream);
+    static bool fs_dir_read(dir_stream_type& stream, dir_entry_type& entry);
+    static void fs_dir_get_current(char* buffer);
+    static const char* fs_dir_entry_name(dir_entry_type& entry);
+
+    static bool fs_path_is_absolute(const char* p);
+    static bool fs_path_root_dir(const char* p, const char** rd, size_t* len);
+    static bool fs_path_root_name(const char* p, const char** rn, size_t* len);
+    static bool fs_path_filename(const char* p, const char** f, size_t* len);
+    static void fs_path_readlink(const char* path, char* buffer, size_t size);
 
     // threads
     using thread_handle_type = struct {

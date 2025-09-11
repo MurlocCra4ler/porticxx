@@ -8,6 +8,8 @@ namespace std {
 /* String examination  */
 /***********************/
 
-std::size_t strlen(const char* str);
+size_t strlen(const char* str);
+
+char* strncpy(char* dest, const char* src, size_t count);
 
 }
