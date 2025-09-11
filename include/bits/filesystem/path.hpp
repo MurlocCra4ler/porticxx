@@ -28,9 +28,26 @@ public:
          format fmt = auto_format);
     ~path() = default;
 
+    // appends
+    path& operator/=(const path& p) {
+        if (p.is_absolute() || (p.has_root_name() && p.root_name() != root_name())) {
+            data_ = p.data_;
+        }
+        data_ += "/";
+        data_ += p;
+    }
+    template<class Source>
+      path& operator/=(const Source& source);
+    template<class Source>
+      path& append(const Source& source);
+    template<class InputIt>
+      path& append(InputIt first, InputIt last);
+
     // non-member operators
     friend bool operator==(const path& lhs, const path& rhs) noexcept { return lhs.data_ == rhs.data_; }
     friend strong_ordering operator<=>(const path& lhs, const path& rhs) noexcept;
+
+    friend path operator/ (const path& lhs, const path& rhs) { return path(lhs) /= rhs; }
 
     // native format observers
     const string_type& native() const noexcept;

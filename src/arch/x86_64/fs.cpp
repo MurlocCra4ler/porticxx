@@ -4,6 +4,11 @@
 
 namespace std::arch {
 
+bool x86_64_arch::fs_read_dir(dir_stream_type stream, dir_entry_type& entry) {
+    __builtin_trap();
+    return false;
+}
+
 void x86_64_arch::fs_readlink(const char* path, char* buffer, size_t size) {
     long len = sys_call3(SYS_readlink, reinterpret_cast<long>(path),
                          reinterpret_cast<long>(buffer), size - 1);

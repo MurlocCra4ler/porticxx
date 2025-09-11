@@ -16,14 +16,20 @@ struct x86_64_arch : public default_arch {
     static ptrdiff_t stdin_read(void* buffer, size_t count);
 
     // filesystem
-    using dir_stream_type = struct {};
-    using dir_entry_type = struct {};
-
     static constexpr std::size_t MAX_PATH_LEN = 4096;
+    static constexpr std::size_t MAX_FILENAME_LEN = 256;
+
+    using dir_stream_type = int;
+    using dir_entry_type = struct {
+        unsigned long inode;
+        char name[MAX_FILENAME_LEN];
+        char type;
+    };
 
     static dir_stream_type fs_open_dir(const char* path);
     static void fs_close_dir(dir_stream_type stream);
     static bool fs_read_dir(dir_stream_type stream, dir_entry_type& entry);
+    static const char* fs_get_name(dir_entry_type& entry);
     static void fs_readlink(const char* path, char* buffer, size_t size);
     static void fs_get_current(char* buffer);
 

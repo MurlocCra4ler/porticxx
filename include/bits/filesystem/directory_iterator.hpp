@@ -2,6 +2,8 @@
 
 #include <bits/arch/arch.hpp>
 #include <bits/filesystem/directory_entry.hpp>
+#include <filesystem>
+#include <system_error>
 
 namespace std::filesystem {
 
@@ -15,16 +17,21 @@ public:
 
     // member functions
     directory_iterator() noexcept = default;
-    explicit directory_iterator(const path& p) : cur_(p) {}
+    explicit directory_iterator(const path& p) : path_(p) {
+        native_stream_ = std::arch::current_arch::fs_open_dir(p.c_str());
+        at_end_ = !std::arch::current_arch::fs_read_dir(native_stream_, native_entry_);
+        filesystem::path file(arch::current_arch::fs_get_name(native_entry_));
+        cur_ = path_ / file;
+    }
     // directory_iterator(const path& p, directory_options options);
     directory_iterator(const path& p, error_code& ec);
     // directory_iterator(const path& p, directory_options options,
     //                    error_code& ec);
     directory_iterator(const directory_iterator& rhs)
-        : cur_(rhs.cur_), nativ_stream_(rhs.nativ_stream_) {}
+        : cur_(rhs.cur_), native_stream_(rhs.native_stream_) {}
     directory_iterator(directory_iterator&& rhs) noexcept
         : cur_(std::move(rhs.cur_)),
-          nativ_stream_(std::move(rhs.nativ_stream_)), at_end_(rhs.at_end_) {
+          native_stream_(std::move(rhs.native_stream_)), at_end_(rhs.at_end_) {
         rhs.at_end_ = true;
     }
     ~directory_iterator() = default;
@@ -35,7 +42,7 @@ public:
     const directory_entry& operator*() const { return cur_; }
     const directory_entry* operator->() const { return &cur_; }
     directory_iterator& operator++() {
-        if (arch::current_arch::fs_read_dir(nativ_stream_,
+        if (arch::current_arch::fs_read_dir(native_stream_,
                                             cur_.native_entry_)) {
             at_end_ = false;
         } else {
@@ -52,8 +59,10 @@ public:
     }
 
 private:
+    filesystem::path path_;
     directory_entry cur_;
-    arch::current_arch::dir_stream_type nativ_stream_;
+    arch::current_arch::dir_stream_type native_stream_;
+    arch::current_arch::dir_entry_type native_entry_;
     bool at_end_ = false;
 };
 

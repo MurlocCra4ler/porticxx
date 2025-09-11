@@ -58,6 +58,9 @@ template <typename Derived> struct arch_base {
     static bool fs_read_dir(dir_stream_type stream, dir_entry_type& entry) {
         return Derived::fs_read_dir(stream, entry);
     }
+    static const char* fs_get_name(dir_entry_type& entry) {
+        return Derived::fs_get_name(entry);
+    }
     static void fs_get_current(char* buffer) {
         return Derived::fs_get_current(buffer);
     };
