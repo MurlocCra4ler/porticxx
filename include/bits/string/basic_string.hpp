@@ -290,6 +290,24 @@ public:
         return std::basic_string_view<CharT, Traits>(data(), size());
     }
 
+    constexpr basic_string substr(size_type pos = 0,
+                                  size_type n = npos) const& {
+        if (pos > size_)
+            pos = size_;
+        if (n > size_ - pos)
+            n = size_ - pos;
+        return basic_string().append(c_str() + pos, n);
+    }
+    constexpr basic_string substr(size_type pos = 0, size_type n = npos) && {
+        if (pos > size_)
+            pos = size_;
+        if (n > size_ - pos)
+            n = size_ - pos;
+
+        size_ = 0;
+        return basic_string().append(c_str() + pos, n);
+    }
+
 private:
     static constexpr size_type INPLACE_SIZE = 1 << 6;
 
