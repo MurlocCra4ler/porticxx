@@ -13,6 +13,11 @@ executable('allocator_test',
            dependencies: porticxx_dep,
            cpp_args: arch_cpp_args + ['-Werror'])
 
+executable('string_test',
+           'string_test.cpp',
+           dependencies: porticxx_dep,
+           cpp_args: arch_cpp_args + ['-Werror'])
+
 executable('thread_test',
            'thread_test.cpp',
            dependencies: porticxx_dep,

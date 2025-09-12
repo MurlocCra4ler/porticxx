@@ -53,26 +53,15 @@ public:
     operator<<(basic_ios<CharT, Traits>& (*pf)(basic_ios<CharT, Traits>&));
     basic_ostream& operator<<(ios_base& (*pf)(ios_base&));
 
-    basic_ostream& operator<<(bool n);
+    basic_ostream& operator<<(bool value) { return insert_impl(value); }
     basic_ostream& operator<<(short n);
     basic_ostream& operator<<(unsigned short n);
-    basic_ostream& operator<<(int n) {
-        using numput_type = num_put<CharT, ostreambuf_iterator<CharT, Traits>>;
-
-        sentry sentry(*this);
-
-        const numput_type& np = use_facet<numput_type>(this->getloc());
-        ostreambuf_iterator<CharT, Traits> it(*this);
-
-        if (np.put(it, *this, this->fill(), static_cast<long>(n)).failed()) {
-            this->setstate(std::ios_base::badbit);
-        }
-
-        return *this;
-    }
+    basic_ostream& operator<<(int value) { return insert_impl<long>(value); }
     basic_ostream& operator<<(unsigned int n);
     basic_ostream& operator<<(long n);
-    basic_ostream& operator<<(unsigned long n);
+    basic_ostream& operator<<(unsigned long value) {
+        return insert_impl(value);
+    }
     basic_ostream& operator<<(long long n);
     basic_ostream& operator<<(unsigned long long n);
     basic_ostream& operator<<(float f);
@@ -89,6 +78,24 @@ public:
     result_ref<basic_ostream> write(const char_type* s, streamsize n);
 
     result_ref<basic_ostream> flush();
+
+private:
+    template <class T> basic_ostream& insert_impl(T val) {
+        using numput_type = num_put<CharT, ostreambuf_iterator<CharT, Traits>>;
+
+        sentry s(*this);
+        if (!s)
+            return *this;
+
+        const numput_type& np = use_facet<numput_type>(this->getloc());
+        ostreambuf_iterator<CharT, Traits> it(*this);
+
+        if (np.put(it, *this, this->fill(), val).failed()) {
+            this->setstate(std::ios_base::badbit);
+        }
+
+        return *this;
+    }
 };
 
 // unformatted output
@@ -107,6 +114,12 @@ result_ref<basic_ostream<CharT, Traits>> basic_ostream<CharT, Traits>::flush() {
         return this->setstate(ios_base::badbit).map_to_ref(*this);
     }
     return *this;
+}
+
+template <class Traits>
+basic_ostream<char, Traits>& operator<<(basic_ostream<char, Traits>& os,
+                                        char ch) {
+    return os.write(&ch, 1);
 }
 
 template <class Traits>

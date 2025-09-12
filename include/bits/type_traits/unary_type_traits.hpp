@@ -210,16 +210,28 @@ template <class T> constexpr bool is_object_v = is_object<T>::value;
 /* Type properties  */
 /********************/
 
+namespace _impl::type_traits {
+template <typename T, bool = std::is_arithmetic<T>::value>
+struct is_signed : std::integral_constant<bool, T(-1) < T(0)> {};
+
+template <typename T> struct is_signed<T, false> : std::false_type {};
+} // namespace _impl::type_traits
+
+template <typename T>
+struct is_signed : _impl::type_traits::is_signed<T>::type {};
+
+template <class T> constexpr bool is_signed_v = is_signed<T>::value;
+
 // is_unsigned
-namespace impl::type_properties {
+namespace _impl::type_traits {
 template <typename T, bool = std::is_arithmetic<T>::value>
 struct is_unsigned : std::integral_constant<bool, T(0) < T(-1)> {};
 
 template <typename T> struct is_unsigned<T, false> : std::false_type {};
-} // namespace impl::type_properties
+} // namespace _impl::type_traits
 
 template <typename T>
-struct is_unsigned : impl::type_properties::is_unsigned<T>::type {};
+struct is_unsigned : _impl::type_traits::is_unsigned<T>::type {};
 
 template <class T> constexpr bool is_unsigned_v = is_unsigned<T>::value;
 

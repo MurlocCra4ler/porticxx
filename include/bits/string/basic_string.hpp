@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include <bits/arch/arch.hpp>
 #include <bits/iterator/adaptor_classes.hpp>
 #include <bits/memory/allocators.hpp>
@@ -88,13 +90,15 @@ public:
         } else {
             // move heap pointer
             data_ = other.data_;
+
             // clear other
             other.data_ = nullptr;
-            other.size_ = 0;
-            other.capacity_ = 0;
             other.using_inplace_ = true;
-            other.inplace_[0] = CharT(0);
+            other.capacity_ = INPLACE_SIZE - 1;
         }
+
+        other.size_ = 0;
+        other.inplace_[0] = Traits::to_char_type(0);
     }
 
     basic_string& operator=(const basic_string& other) {
@@ -142,7 +146,7 @@ public:
     constexpr void resize(size_type n);
     template <class Operation>
     constexpr void resize_and_overwrite(size_type n, Operation op);
-    constexpr size_type capacity() const noexcept;
+    constexpr size_type capacity() const noexcept { return capacity_; }
     constexpr void reserve(size_type res_arg);
 
     // element access
@@ -197,7 +201,10 @@ public:
         return append(str);
     }
     template <class T> constexpr basic_string& operator+=(const T& t);
-    constexpr basic_string& operator+=(const CharT* s);
+    constexpr basic_string& operator+=(const CharT* s) {
+        size_type n = strlen(s);
+        return append(s, n);
+    }
     constexpr basic_string& operator+=(CharT c) {
         push_back(c);
         return *this;
@@ -224,7 +231,11 @@ public:
         data()[size_] = Traits::to_char_type(0);
         return *this;
     }
-    constexpr basic_string& append(const CharT* s);
+    constexpr basic_string& append(const CharT* s) {
+        size_type n = strlen(s);
+        append(s, n);
+        return *this;
+    }
     constexpr basic_string& append(size_type n, CharT c);
     template <class InputIt>
     constexpr basic_string& append(InputIt first, InputIt last);
@@ -289,9 +300,9 @@ private:
         CharT inplace_[INPLACE_SIZE];
     };
 
-    size_type size_;
-    size_type capacity_;
-    bool using_inplace_;
+    size_type size_ = 0;
+    size_type capacity_ = INPLACE_SIZE - 1;
+    bool using_inplace_ = true;
 
     constexpr void grow(size_type new_cap = 0) {
         size_t n = (new_cap > 0) ? new_cap : (capacity_ + 1) << 1;
