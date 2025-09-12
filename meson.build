@@ -45,6 +45,7 @@ sources = files(
     'src/cstdlib.cpp',
     'src/thread/thread.cpp',
     'src/mutex/mutex.cpp',
+    'src/cctype.cpp',
 )
 
 porticxx_lib = static_library(
