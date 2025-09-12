@@ -75,9 +75,26 @@ public:
             ctrl->strong_count += 1;
     }
 
-    template <class Y> shared_ptr(const shared_ptr<Y>& r) noexcept;
-    shared_ptr(shared_ptr&& r) noexcept;
-    template <class Y> shared_ptr(shared_ptr<Y>&& r) noexcept;
+    template <class Y>
+    shared_ptr(const shared_ptr<Y>& r) noexcept
+        requires is_convertible_v<Y*, T*>
+    {
+        ptr = r.ptr;
+        ctrl = r.ctrl;
+        if (ctrl)
+            ctrl->strong_count++;
+    }
+    shared_ptr(shared_ptr&& r) noexcept : ptr(r.ptr), ctrl(r.ctrl) {
+        r.ptr = nullptr;
+        r.ctrl = nullptr;
+    }
+    template <class Y>
+    shared_ptr(shared_ptr<Y>&& r) noexcept
+        requires is_convertible_v<Y*, T*>
+        : ptr(r.ptr), ctrl(r.ctrl) {
+        r.ptr = nullptr;
+        r.ctrl = nullptr;
+    }
     template <class Y> explicit shared_ptr(const weak_ptr<Y>& r);
     template <class Y, class D> shared_ptr(unique_ptr<Y, D>&& r);
 
@@ -116,6 +133,8 @@ private:
         ctrl = nullptr;
         ptr = nullptr;
     }
+
+    template <class U> friend class shared_ptr;
 
     template <class U, class... Args>
     friend shared_ptr<U> make_shared(Args&&... args);
