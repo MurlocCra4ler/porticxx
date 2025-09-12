@@ -10,11 +10,6 @@ namespace std {
 
 template<class> class function;
 
-template<typename T>
-typename std::add_rvalue_reference<T>::type declval() noexcept {
-    static_assert(false, "declval not allowed in an evaluated context");
-}
-
 template< class F, class... Args >
 std::invoke_result_t<F, Args...>
     invoke(F&& f, Args&&... args) noexcept;

@@ -43,6 +43,12 @@ constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
 
 // is_convertible
 namespace _impl_type_relationships {
+
+template<typename T>
+typename std::add_rvalue_reference<T>::type declval() noexcept {
+    static_assert(false, "declval not allowed in an evaluated context");
+}
+
 template <class T>
 auto test_returnable(int) -> decltype(void(static_cast<T (*)()>(nullptr)),
                                       std::true_type{});

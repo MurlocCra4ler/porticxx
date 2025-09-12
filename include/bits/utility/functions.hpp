@@ -21,4 +21,9 @@ constexpr auto move_if_noexcept(T& x) noexcept
     }
 }
 
+template<typename T>
+typename std::add_rvalue_reference<T>::type declval() noexcept {
+    static_assert(false, "declval not allowed in an evaluated context");
+}
+
 } // namespace std
