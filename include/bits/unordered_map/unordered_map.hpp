@@ -1,8 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <bits/functional/equal_to.hpp>
 #include <bits/memory/allocators.hpp>
 #include <bits/utility/tags.hpp>
+#include <initializer_list>
 #include <iterator>
 #include <tuple>
 
@@ -28,7 +30,7 @@ public:
     using pointer = value_type*;
     using reference = value_type&;
 
-    node_iterator(Node* n) : cur_(n) {}
+    node_iterator(Node* n) : cur_(n) { advance_to_valid(); }
 
     reference operator*() const { return *cur_->value; }
     pointer operator->() const { return cur_->value; }
@@ -44,6 +46,7 @@ public:
     node_iterator& operator++() {
         if (cur_) {
             cur_ = cur_->next;
+            advance_to_valid();
         }
         return *this;
     }
@@ -55,7 +58,12 @@ public:
     }
 
 private:
-    Node* cur_;
+    Node* cur_ = nullptr;
+
+    void advance_to_valid() {
+        while (cur_ && cur_->value == nullptr)
+            cur_ = cur_->next;
+    }
 };
 
 } // namespace _impl_unordered_map
@@ -86,8 +94,24 @@ public:
     using const_local_iterator =
         _impl_unordered_map::node_iterator<const node_type>;
 
+    unordered_map() = default;
+
+    unordered_map(std::initializer_list<value_type> init, size_type = 0,
+                  const Hash& hash = Hash(), const key_equal& = key_equal(),
+                  const Allocator& alloc = Allocator())
+        : hash_(hasher()), equal_(key_equal()), pair_allocator_(alloc) {
+        reserve(init.size());
+        for (const auto& el : init) {
+            insert(el);
+        }
+    }
+
     // iterators
-    iterator begin() noexcept;
+    iterator begin() noexcept {
+        if (empty())
+            return end();
+        return iterator(buckets_[0].next);
+    }
     const_iterator begin() const noexcept;
     iterator end() noexcept { return iterator(nullptr); }
     const_iterator end() const noexcept;
@@ -98,6 +122,33 @@ public:
     bool empty() const noexcept { return size_ == 0; }
     size_type size() const noexcept { return size_; }
     size_type max_size() const noexcept;
+
+    template <class... Args> pair<iterator, bool> emplace(Args&&... args);
+    template <class... Args>
+    iterator emplace_hint(const_iterator position, Args&&... args);
+    pair<iterator, bool> insert(const value_type& obj) {
+        iterator it = find(obj.first);
+        if (it != end()) {
+            return {it, false};
+        }
+
+        node_type* node = allocate_element(obj.first);
+        ::new (static_cast<void*>(node->value)) value_type(obj);
+        return {iterator(node), true};
+    }
+    pair<iterator, bool> insert(value_type&& obj) {
+        iterator it = find(obj.first);
+        if (it != end()) {
+            return {it, false};
+        }
+
+        node_type* node = allocate_element(obj.first);
+        ::new (static_cast<void*>(node->value)) value_type(std::move(obj));
+        return {iterator(node), true};
+    }
+    template <class P> pair<iterator, bool> insert(P&& obj);
+    iterator insert(const_iterator hint, const value_type& obj);
+    iterator insert(const_iterator hint, value_type&& obj);
 
     iterator erase(iterator pos) {
         if (pos == end())
@@ -110,12 +161,12 @@ public:
     size_type erase(const key_type& key);
     template <class K> size_type erase(K&& x) {
         size_type count = 0;
-        size_type bucket_idx = hasher{}(x) % num_buckets_;
+        size_type bucket_idx = hash_(x) % num_buckets_;
 
         node_type* it = buckets_[bucket_idx].next;
         while (it && it->value) {
             node_type* next = it->next;
-            if (key_equal{}(it->value->first, x)) {
+            if (equal_(it->value->first, x)) {
                 free_element(it);
                 count += 1;
             }
@@ -133,8 +184,10 @@ public:
 
     // map operations
     iterator find(const key_type& k) {
-        size_type bucket_idx = hasher{}(k) % num_buckets_;
+        if (empty())
+            return end();
 
+        size_type bucket_idx = hash_(k) % num_buckets_;
         for (node_type* it = buckets_[bucket_idx].next; it != nullptr;
              it = it->next) {
             if (!it->value) {
@@ -142,7 +195,7 @@ public:
                 return end();
             }
 
-            if (key_equal{}(it->value->first, k)) {
+            if (equal_(it->value->first, k)) {
                 return iterator(it);
             }
         }
@@ -153,7 +206,7 @@ public:
     template <class K> iterator find(const K& k) {
         if (empty())
             return end();
-        size_type bucket_idx = hasher{}(k) % num_buckets_;
+        size_type bucket_idx = hash_(k) % num_buckets_;
 
         for (node_type* it = buckets_[bucket_idx].next; it != nullptr;
              it = it->next) {
@@ -162,7 +215,7 @@ public:
                 return end();
             }
 
-            if (key_equal{}(it->value->first, k)) {
+            if (equal_(it->value->first, k)) {
                 return iterator(it);
             }
         }
@@ -182,36 +235,17 @@ public:
 
     // element access
     mapped_type& operator[](const key_type& k) {
-        iterator it = find(k);
-        if (it != end()) {
-            return it->value->second;
-        }
-
-        node_type* node = allocate_element();
-        ::new (static_cast<void*>(node->value)) value_type(k, mapped_type{});
-        return node->value->second;
+        auto [it, inserted] = insert(value_type(k, mapped_type{}));
+        return it->second;
     }
     mapped_type& operator[](key_type&& k) {
-        iterator it = find(k);
-        if (it != end()) {
-            return it->value->second;
-        }
-
-        node_type* node = allocate_element(k);
-        ::new (static_cast<void*>(node->value)) value_type(std::move(k), T{});
-        return node->value->second;
+        auto [it, inserted] = insert(value_type(std::move(k), mapped_type{}));
+        return it->second;
     }
     template <class K> mapped_type& operator[](K&& k) {
-        iterator it = find(k);
-        if (it != end()) {
-            return it->second;
-        }
-
-        node_type* node = allocate_element(k);
-        ::new (static_cast<void*>(node->value)) value_type(
-            piecewise_construct, forward_as_tuple(std::forward<K>(k)),
-            forward_as_tuple());
-        return node->value->second;
+        auto [it, inserted] =
+            insert(value_type(std::forward<K>(k), mapped_type{}));
+        return it->second;
     }
     mapped_type& at(const key_type& k);
     const mapped_type& at(const key_type& k) const;
@@ -221,6 +255,9 @@ public:
 private:
     using node_allocator_type =
         typename allocator_traits<Allocator>::template rebind_alloc<node_type>;
+
+    hasher hash_;
+    key_equal equal_;
 
     allocator_type pair_allocator_;
     node_allocator_type node_allocator_;
@@ -240,7 +277,7 @@ private:
 
     node_type* allocate_element(const key_type& k) {
         if (size_ >= capacity_) {
-            grow();
+            reserve(std::max(size_ + 1, capacity_ << 1));
         }
 
         // find free element
@@ -253,7 +290,7 @@ private:
         }
 
         // find bucket
-        size_type bucket_idx = hasher{}(k) % num_buckets_;
+        size_type bucket_idx = hash_(k) % num_buckets_;
         node_type* bucket = &buckets_[bucket_idx];
 
         // insert new element at front
@@ -299,8 +336,9 @@ private:
         }
     }
 
-    void grow() {
-        size_type new_capacity = capacity_ > 0 ? capacity_ << 1 : 2;
+    void reserve(size_t new_capacity) {
+        if (new_capacity < 0)
+            return;
         size_type required_buckets = static_cast<size_type>(new_capacity / ml_);
         if (required_buckets == 0)
             required_buckets = 1;
@@ -330,7 +368,7 @@ private:
             new_el->value = val;
 
             // find bucket
-            size_type bucket_idx = hasher{}(val->first) % required_buckets;
+            size_type bucket_idx = hash_(val->first) % required_buckets;
             node_type* bucket = &new_buckets[bucket_idx];
 
             // insert new element at front

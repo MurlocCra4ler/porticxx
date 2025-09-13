@@ -33,7 +33,6 @@ void test_unordered_map_basic() {
     assert(m.find("b") == m.end());
     assert(m.size() == 2);
 
-    /*
     auto [insIt, inserted] = m.insert({"d", 99});
     assert(inserted);
     assert(insIt->first == "d");
@@ -44,10 +43,20 @@ void test_unordered_map_basic() {
     assert(insIt2->second == 99);
 
     int sum = 0;
-    for (auto &p : m) {
+    for (auto& p : m) {
         sum += p.second;
     }
     assert(sum == (42 + 3 + 99)); // a=42, c=3, d=99*/
+
+    std::unordered_map<std::string, int> m2{
+        {"a", 1},
+        {"b", 2},
+        {"c", 3},
+    };
+    assert(m2.size() == 3);
+    assert(m2["a"] == 1);
+    assert(m2["b"] == 2);
+    assert(m2["c"] == 3);
 }
 
 void test_unordered_map_bucket_interface() {

@@ -16,6 +16,13 @@ template <class T1, class T2> struct pair {
     pair(const pair&) = default;
     pair(pair&&) = default;
 
+    constexpr explicit(!is_default_constructible_v<T1> ||
+                       !is_default_constructible_v<T2>) pair();
+    constexpr explicit(!is_convertible_v<const T1&, T1> ||
+                       !is_convertible_v<const T2&, T2>)
+        pair(const T1& x, const T2& y)
+        : first(x), second(y) {}
+
     template <class... Args1, class... Args2>
     pair(piecewise_construct_t, tuple<Args1...> first_args,
          tuple<Args2...> second_args) {
