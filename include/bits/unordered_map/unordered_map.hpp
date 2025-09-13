@@ -112,9 +112,13 @@ public:
             return end();
         return iterator(buckets_[0].next);
     }
-    const_iterator begin() const noexcept;
+    const_iterator begin() const noexcept {
+        if (empty())
+            return end();
+        return const_iterator(buckets_[0].next);
+    }
     iterator end() noexcept { return iterator(nullptr); }
-    const_iterator end() const noexcept;
+    const_iterator end() const noexcept { return const_iterator(nullptr); }
     const_iterator cbegin() const noexcept;
     const_iterator cend() const noexcept;
 
