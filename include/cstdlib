@@ -3,5 +3,6 @@
 namespace std {
 
 [[noreturn]] void abort() noexcept;
+[[noreturn]] void exit(int exit_code);
 
 }
