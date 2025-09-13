@@ -123,6 +123,11 @@ template <typename Derived> struct arch_base {
         return Derived::atomic_fetch_add(ref, val);
     }
 
+    // process
+    static int exec(const char* path, char* argv[]) {
+        return Derived::exec(path, argv);
+    }
+
     // runtime
     [[noreturn]] static void exit(int exit_code) { Derived::exit(exit_code); }
 

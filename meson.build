@@ -18,6 +18,7 @@ elif arch_name == 'x86_64'
         'src/arch/x86_64/io.cpp',
         'src/arch/x86_64/fs.cpp',
         'src/arch/x86_64/thread.cpp',
+        'src/arch/x86_64/process.cpp',
         'src/arch/x86_64/sys_call.s',
     )
     arch_cpp_args = ['-DPCXX_ARCH_X86_64']

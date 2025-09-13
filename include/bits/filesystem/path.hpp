@@ -90,7 +90,7 @@ public:
     // native format observers
     const string_type& native() const noexcept { return native_; }
     const value_type* c_str() const noexcept { return native_.c_str(); }
-    operator string_type() const;
+    operator string_type() const { return native_; }
 
     template <class ECharT, class Traits = char_traits<ECharT>,
               class Allocator = allocator<ECharT>>

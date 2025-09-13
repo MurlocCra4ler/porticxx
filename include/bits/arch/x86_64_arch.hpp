@@ -76,6 +76,9 @@ struct x86_64_arch : public default_arch {
         return __atomic_fetch_add(&ref, val, __ATOMIC_SEQ_CST);
     }
 
+    // process
+    static int exec(const char* path, char* argv[]);
+
     // runtime
     [[noreturn]] static void exit(int exit_code);
 };
