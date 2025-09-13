@@ -44,6 +44,7 @@ sources = files(
     'src/cstring.cpp',
     'src/cstdlib.cpp',
     'src/thread/thread.cpp',
+    'src/filesystem.cpp',
     'src/mutex/mutex.cpp',
     'src/cctype.cpp',
 )
