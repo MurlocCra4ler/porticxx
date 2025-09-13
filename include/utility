@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bits/swap.hpp>
 #include <bits/utility/functions.hpp>
 #include <bits/utility/tags.hpp>
 #include <bits/utility/pair.hpp>

@@ -9,6 +9,7 @@ int main() {
 
     std::string path = "."; // aktuelles Verzeichnis
     for (const auto& entry : fs::directory_iterator(path)) {
-        std::cout << entry.path().string() << std::endl;
+        std::cout << "path: " << entry.path()
+                  << ", filename: " << entry.path().filename() << std::endl;
     }
 }

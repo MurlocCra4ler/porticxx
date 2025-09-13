@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bits/iterator/primitives.hpp>
+#include <bits/algorithm/sorting_operations.hpp>
 #include <initializer_list>
 
 namespace std {
