@@ -4,11 +4,6 @@
 
 namespace std {
 
-template <class T>
-constexpr void
-swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible<T>::value &&
-                          std::is_nothrow_move_assignable<T>::value);
-
 // template<class T, size_t N>
 // constexpr void swap(T (&a)[N], T (&b)[N])
 // noexcept(std::is_nothrow_swappable_v<T>);
@@ -16,6 +11,15 @@ swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible<T>::value &&
 template <class T> constexpr T&& forward(remove_reference_t<T>& t) noexcept;
 
 template <class T> constexpr remove_reference_t<T>&& move(T&& t) noexcept;
+
+template <class T>
+constexpr void
+swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible<T>::value &&
+                          std::is_nothrow_move_assignable<T>::value) {
+    T tmp = std::move(a);
+    a = std::move(b);
+    b = std::move(tmp);
+}
 
 template <class T>
 constexpr auto move_if_noexcept(T& x) noexcept

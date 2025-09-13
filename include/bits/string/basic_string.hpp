@@ -3,6 +3,7 @@
 
 #include <cstring>
 
+#include <bits/algorithm/modifying_sequence_operations.hpp>
 #include <bits/arch/arch.hpp>
 #include <bits/iterator/adaptor_classes.hpp>
 #include <bits/memory/allocators.hpp>
@@ -278,6 +279,17 @@ public:
     constexpr iterator erase(const_iterator p);
     constexpr iterator erase(const_iterator first, const_iterator last);
 
+    constexpr void swap(basic_string& other) noexcept {
+        std::swap(allocator_, other.allocator_);
+        std::swap(data_, other.data_);
+        std::swap(size_, other.size_);
+        std::swap(capacity_, other.capacity_);
+        std::swap(using_inplace_, other.using_inplace_);
+
+        if (using_inplace_ || other.using_inplace_)
+            std::swap_ranges(inplace_, inplace_ + INPLACE_SIZE, other.inplace_);
+    }
+
     // string operations
     constexpr const CharT* c_str() const noexcept { return data(); }
     constexpr const CharT* data() const noexcept {
@@ -307,6 +319,40 @@ public:
         size_ = 0;
         return basic_string().append(c_str() + pos, n);
     }
+
+    // template<class T>
+    // constexpr int compare(const T& t) const noexcept(/* see description */);
+    template <class T>
+    constexpr int compare(size_type pos1, size_type n1, const T& t) const;
+    template <class T>
+    constexpr int compare(size_type pos1, size_type n1, const T& t,
+                          size_type pos2, size_type n2 = npos) const;
+    constexpr int compare(const basic_string& str) const noexcept {
+        return compare(str.c_str());
+    }
+    constexpr int compare(size_type pos1, size_type n1,
+                          const basic_string& str) const;
+    constexpr int compare(size_type pos1, size_type n1, const basic_string& str,
+                          size_type pos2, size_type n2 = npos) const;
+    constexpr int compare(const CharT* s) const {
+        size_type i = 0;
+        while (true) {
+            CharT c1 = c_str()[i];
+            CharT c2 = s[i];
+
+            if (Traits::lt(c1, c2))
+                return -1;
+            if (Traits::lt(c2, c1))
+                return 1;
+            if (c1 == Traits::to_char_type(0))
+                return 0;
+
+            ++i;
+        }
+    }
+    constexpr int compare(size_type pos1, size_type n1, const CharT* s) const;
+    constexpr int compare(size_type pos1, size_type n1, const CharT* s,
+                          size_type n2) const;
 
 private:
     static constexpr size_type INPLACE_SIZE = 1 << 6;
@@ -423,27 +469,47 @@ bool operator==(const std::basic_string<CharT, Traits, Alloc>& lhs,
 
 /* Compare two basic_string objects */
 template <class CharT, class Traits, class Alloc>
-bool operator!=(const std::basic_string<CharT, Traits, Alloc>& lhs,
-                const std::basic_string<CharT, Traits, Alloc>& rhs) {
-    return !(lhs == rhs);
-}
-
-/* Compare a basic_string object and null-terminated array of T */
-template <class CharT, class Traits, class Alloc>
 bool operator==(const std::basic_string<CharT, Traits, Alloc>& lhs,
                 const CharT* rhs) {
-    if (!rhs)
-        return false;
-
-    auto it = lhs.begin();
-    for (; *rhs != CharT(); ++rhs, ++it) {
-        if (it == lhs.end() || !Traits::eq(*it, *rhs)) {
-            return false;
-        }
-    }
-
-    return it = lhs.end();
+    return lhs.compare(rhs) == 0;
 }
+
+template <class CharT, class Traits, class Alloc>
+bool operator!=(const std::basic_string<CharT, Traits, Alloc>& lhs,
+                const std::basic_string<CharT, Traits, Alloc>& rhs) {
+    return lhs.compare(rhs) != 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator<(const std::basic_string<CharT, Traits, Alloc>& lhs,
+               const std::basic_string<CharT, Traits, Alloc>& rhs) {
+    return lhs.compare(rhs) < 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator<=(const std::basic_string<CharT, Traits, Alloc>& lhs,
+                const std::basic_string<CharT, Traits, Alloc>& rhs) {
+    return lhs.compare(rhs) <= 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator>(const std::basic_string<CharT, Traits, Alloc>& lhs,
+               const std::basic_string<CharT, Traits, Alloc>& rhs) {
+    return lhs.compare(rhs) > 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator>=(const std::basic_string<CharT, Traits, Alloc>& lhs,
+                const std::basic_string<CharT, Traits, Alloc>& rhs) {
+    return lhs.compare(rhs) >= 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+void swap(std::basic_string<CharT, Traits, Alloc>& lhs,
+          std::basic_string<CharT, Traits, Alloc>&
+              rhs) noexcept(noexcept(lhs.swap(rhs))) {
+    lhs.swap(rhs);
+};
 
 template <class A> struct hash;
 

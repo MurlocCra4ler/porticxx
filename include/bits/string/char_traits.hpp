@@ -23,7 +23,9 @@ template <> struct char_traits<char> {
     static constexpr bool eq(char_type c1, char_type c2) noexcept {
         return c1 == c2;
     }
-    static constexpr bool lt(char_type c1, char_type c2) noexcept;
+    static constexpr bool lt(char_type c1, char_type c2) noexcept {
+        return c1 < c2;
+    }
 
     static constexpr int compare(const char_type* s1, const char_type* s2,
                                  size_t n);

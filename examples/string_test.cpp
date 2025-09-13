@@ -1,5 +1,6 @@
 #include <cassert>
 #include <string>
+#include <vector>
 
 int main() {
     // default
@@ -64,6 +65,9 @@ int main() {
 
     std::string s5;
     std::cout << std::hash<std::string>()(s5) << std::endl;
+
+    std::vector<std::string> words = {"banana", "apple", "cherry", "date"};
+    std::sort(words.begin(), words.end());
 
     std::cout << "All tests passed!" << std::endl;
     return 0;
