@@ -36,6 +36,7 @@ struct x86_64_arch : public default_arch {
     static void fs_dir_close(dir_stream_type& stream);
     static bool fs_dir_read(dir_stream_type& stream, dir_entry_type& entry);
     static void fs_dir_get_current(char* buffer);
+    static void fs_dir_set_current(const char* path);
     static const char* fs_dir_entry_name(dir_entry_type& entry);
 
     static bool fs_path_is_absolute(const char* p);

@@ -12,4 +12,6 @@ int main() {
         std::cout << "path: " << entry.path()
                   << ", filename: " << entry.path().filename() << std::endl;
     }
+
+    fs::current_path("..");
 }

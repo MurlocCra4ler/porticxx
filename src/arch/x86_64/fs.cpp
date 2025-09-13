@@ -3,6 +3,7 @@
 #include <fcntl.h>
 
 #include <bits/arch/x86_64_arch.hpp>
+#include <unistd.h>
 
 #include "sys_call.hpp"
 
@@ -57,6 +58,10 @@ bool x86_64_arch::fs_dir_read(dir_stream_type& stream, dir_entry_type& entry) {
 void x86_64_arch::fs_dir_get_current(char* buffer) {
     x86_64_arch::fs_path_readlink("/proc/self/cwd", buffer,
                                   x86_64_arch::MAX_PATH_LEN);
+}
+
+void x86_64_arch::fs_dir_set_current(const char* path) {
+    sys_call(SYS_chdir, reinterpret_cast<long>(path));
 }
 
 const char* x86_64_arch::fs_dir_entry_name(x86_64_arch::dir_entry_type& entry) {

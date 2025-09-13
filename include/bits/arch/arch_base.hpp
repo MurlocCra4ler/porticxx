@@ -61,6 +61,9 @@ template <typename Derived> struct arch_base {
     static void fs_dir_get_current(char* buffer) {
         Derived::fs_dir_get_current(buffer);
     }
+    static void fs_dir_set_current(const char* path) {
+        Derived::fs_dir_set_current(path);
+    }
     static const char* fs_dir_entry_name(dir_entry_type& entry) {
         return Derived::fs_dir_entry_name(entry);
     }

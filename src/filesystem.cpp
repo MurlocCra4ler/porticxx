@@ -10,4 +10,8 @@ path current_path() {
     return buffer;
 }
 
+void current_path(const path& p) {
+    arch::current_arch::fs_dir_set_current(p.c_str());
+}
+
 } // namespace std::filesystem
