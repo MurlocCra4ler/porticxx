@@ -6,7 +6,6 @@
 #include <bits/utility/tags.hpp>
 #include <initializer_list>
 #include <iterator>
-#include <tuple>
 
 namespace std {
 
@@ -187,46 +186,16 @@ public:
     void clear() noexcept;
 
     // map operations
-    iterator find(const key_type& k) {
-        if (empty())
-            return end();
-
-        size_type bucket_idx = hash_(k) % num_buckets_;
-        for (node_type* it = buckets_[bucket_idx].next; it != nullptr;
-             it = it->next) {
-            if (!it->value) {
-                // we reached the next bucket
-                return end();
-            }
-
-            if (equal_(it->value->first, k)) {
-                return iterator(it);
-            }
-        }
-
-        return end();
+    iterator find(const key_type& k) { return iterator(find_node(k)); }
+    const_iterator find(const key_type& k) const {
+        return const_iterator(find_node(k));
     }
-    const_iterator find(const key_type& k) const {}
     template <class K> iterator find(const K& k) {
-        if (empty())
-            return end();
-        size_type bucket_idx = hash_(k) % num_buckets_;
-
-        for (node_type* it = buckets_[bucket_idx].next; it != nullptr;
-             it = it->next) {
-            if (!it->value) {
-                // we reached the next bucket
-                return end();
-            }
-
-            if (equal_(it->value->first, k)) {
-                return iterator(it);
-            }
-        }
-
-        return end();
+        return iterator(find_node(k));
     }
-    template <class K> const_iterator find(const K& k) const;
+    template <class K> const_iterator find(const K& k) const {
+        return const_iterator(find_node(k));
+    }
     size_type count(const key_type& k) const;
     template <class K> size_type count(const K& k) const;
     bool contains(const key_type& k) const;
@@ -328,6 +297,21 @@ private:
         pair_allocator_.deallocate(el->value, 1);
         el->value = nullptr;
         size_ -= 1;
+    }
+
+    template <class K> node_type* find_node(const K& k) const {
+        if (empty())
+            return nullptr;
+
+        size_type bucket_idx = hash_(k) % num_buckets_;
+        for (node_type* it = buckets_[bucket_idx].next; it; it = it->next) {
+            if (!it->value)
+                // end of bucket
+                return nullptr;
+            if (equal_(it->value->first, k))
+                return it;
+        }
+        return nullptr;
     }
 
     template <class Fn> void for_each_element(Fn&& fn) {

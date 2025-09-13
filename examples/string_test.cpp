@@ -62,6 +62,9 @@ int main() {
     std::cout << "size: " << s4.size() << ", capacity: " << s4.capacity()
               << ", empty: " << s4.empty() << "\n";
 
+    std::string s5;
+    std::cout << std::hash<std::string>()(s5) << std::endl;
+
     std::cout << "All tests passed!" << std::endl;
     return 0;
 }
