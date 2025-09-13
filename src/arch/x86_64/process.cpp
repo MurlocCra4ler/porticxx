@@ -9,7 +9,7 @@
 
 namespace std::arch {
 
-int x86_64_arch::exec(const char* path, char* argv[]) {
+int x86_64_arch::exec(const char* path, const char* argv[]) {
     return sys_call3(SYS_execve, reinterpret_cast<long>(path),
                      reinterpret_cast<long>(argv), 0);
 }

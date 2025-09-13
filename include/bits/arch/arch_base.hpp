@@ -124,7 +124,7 @@ template <typename Derived> struct arch_base {
     }
 
     // process
-    static int exec(const char* path, char* argv[]) {
+    static int exec(const char* path, const char* argv[]) {
         return Derived::exec(path, argv);
     }
 

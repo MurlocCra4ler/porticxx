@@ -100,6 +100,10 @@ public:
     constexpr const_reference operator[](size_type n) const { return data_[n]; }
     constexpr reference front();
 
+    // data access
+    constexpr T* data() noexcept { return data_; }
+    constexpr const T* data() const noexcept { return data_; }
+
     // modifiers
     template<class... Args>
     constexpr reference emplace_back(Args&&... args) {

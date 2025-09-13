@@ -77,7 +77,7 @@ struct x86_64_arch : public default_arch {
     }
 
     // process
-    static int exec(const char* path, char* argv[]);
+    static int exec(const char* path, const char* argv[]);
 
     // runtime
     [[noreturn]] static void exit(int exit_code);
