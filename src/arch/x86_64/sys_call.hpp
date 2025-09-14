@@ -36,11 +36,20 @@ static inline long sys_call3(long n, long a1, long a2, long a3) {
     return ret;
 }
 
-static inline long sys_call(long n, long a) {
+static inline long sys_call1(long n, long a) {
     long ret;
     asm volatile("syscall"
                  : "=a"(ret)
                  : "a"(n), "D"(a)
+                 : "rcx", "r11", "memory");
+    return ret;
+}
+
+static inline long sys_call(long n) {
+    long ret;
+    asm volatile("syscall"
+                 : "=a"(ret)
+                 : "a"(n)
                  : "rcx", "r11", "memory");
     return ret;
 }

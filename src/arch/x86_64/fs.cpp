@@ -61,7 +61,7 @@ void x86_64_arch::fs_dir_get_current(char* buffer) {
 }
 
 void x86_64_arch::fs_dir_set_current(const char* path) {
-    sys_call(SYS_chdir, reinterpret_cast<long>(path));
+    sys_call1(SYS_chdir, reinterpret_cast<long>(path));
 }
 
 const char* x86_64_arch::fs_dir_entry_name(x86_64_arch::dir_entry_type& entry) {
